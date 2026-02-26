@@ -2,11 +2,13 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── CORS preflight fix ────────────────────────────────────────────────────────
+// ─── LESSON 1: CORS preflight fix — handles OPTIONS before anything else ──────
+// Without this, GitHub Pages → Render gives ERR_CONNECTION_CLOSED
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -19,48 +21,29 @@ app.use(express.json());
 
 // ─── MongoDB Connection ────────────────────────────────────────────────────────
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB Atlas — SIMS HMS'))
+  .then(() => console.log('✅ Connected to MongoDB Atlas'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
-
-// ─── SIMS HOSPITAL SPECIALIZATIONS ────────────────────────────────────────────
-const SIMS_SPECIALIZATIONS = [
-  'Cardiology & Cardiac Surgery',
-  'Neurology & Neurosurgery',
-  'Nephrology & Urology',
-  'Gastroenterology & Hepatology',
-  'Orthopaedics & Joint Replacement',
-  'Oncology & Cancer Care',
-  'Pulmonology & Respiratory Medicine',
-  'Endocrinology & Diabetology',
-  'Rheumatology & Immunology',
-  'Plastic Surgery & Aesthetics',
-  'General Medicine',
-  'General Surgery',
-  'Pediatrics & Neonatology',
-  'Obstetrics & Gynaecology',
-  'Ophthalmology',
-  'ENT (Ear, Nose & Throat)',
-  'Dermatology',
-  'Psychiatry & Psychology',
-  'Radiology & Imaging',
-  'Anaesthesiology & Critical Care',
-  'Emergency Medicine',
-  'Organ Transplant',
-  'Physiotherapy & Rehabilitation',
-  'Dietetics & Nutrition'
-];
 
 // ─── SCHEMAS ──────────────────────────────────────────────────────────────────
 
 const doctorSchema = new mongoose.Schema({
   doctorId: { type: String, required: true, unique: true },
   name: { type: String, required: true, trim: true },
-  specialization: { type: String, required: true },
+  specialization: { type: String, required: true, trim: true },
   phone: { type: String, default: '' },
   email: { type: String, default: '' },
   qualification: { type: String, default: '' },
-  department: { type: String, default: '' },
+  passwordHash: { type: String, required: true },
   registeredAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+// Staff accounts schema (reception, lab, pharmacy, billing, admin)
+const staffSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true, trim: true },
+  passwordHash: { type: String, required: true },
+  role: { type: String, required: true, enum: ['reception', 'lab', 'pharmacy', 'billing', 'admin'] },
+  name: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 const patientSchema = new mongoose.Schema({
@@ -71,15 +54,8 @@ const patientSchema = new mongoose.Schema({
   gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
   phone: { type: String, default: '' },
   address: { type: String, default: '' },
-  bloodGroup: { type: String, default: '' },
-  emergencyContact: { type: String, default: '' },
   chiefComplaint: { type: String, required: true },
   assignedDoctorId: { type: String, default: '' },
-  insuranceProvider: { type: String, default: '' },
-  insurancePolicyNo: { type: String, default: '' },
-  isIPD: { type: Boolean, default: false },
-  wardBed: { type: String, default: '' },
-  admittedAt: { type: Date, default: null },
   registeredAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
@@ -87,19 +63,8 @@ const encounterSchema = new mongoose.Schema({
   encounterId: { type: String, required: true, unique: true },
   patientId: { type: String, required: true, index: true },
   doctorName: { type: String, required: true },
-  specialization: { type: String, default: '' },
   diagnosis: { type: String, required: true },
-  icdCode: { type: String, default: '' },
   notes: { type: String, default: '' },
-  vitals: {
-    bp: { type: String, default: '' },
-    pulse: { type: String, default: '' },
-    temp: { type: String, default: '' },
-    spo2: { type: String, default: '' },
-    weight: { type: String, default: '' },
-    height: { type: String, default: '' }
-  },
-  followUpDate: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
@@ -107,14 +72,9 @@ const labTestSchema = new mongoose.Schema({
   testId: { type: String, required: true, unique: true },
   encounterId: { type: String, required: true, index: true },
   patientId: { type: String, required: true },
-  patientName: { type: String, default: '' },
   testName: { type: String, required: true },
-  testCategory: { type: String, default: 'General' },
-  urgency: { type: String, enum: ['ROUTINE', 'URGENT', 'STAT'], default: 'ROUTINE' },
-  status: { type: String, enum: ['PENDING', 'PROCESSING', 'COMPLETED'], default: 'PENDING', index: true },
+  status: { type: String, enum: ['PENDING', 'COMPLETED'], default: 'PENDING', index: true },
   result: { type: String, default: null },
-  referenceRange: { type: String, default: '' },
-  remarks: { type: String, default: '' },
   orderedAt: { type: Date, default: Date.now },
   completedAt: { type: Date, default: null }
 }, { timestamps: true });
@@ -123,17 +83,12 @@ const prescriptionSchema = new mongoose.Schema({
   prescriptionId: { type: String, required: true, unique: true },
   encounterId: { type: String, required: true, index: true },
   patientId: { type: String, required: true },
-  patientName: { type: String, default: '' },
-  doctorName: { type: String, default: '' },
   medicines: [{
     medicineName: String,
     dosage: String,
-    frequency: String,
     duration: String,
-    route: { type: String, default: 'Oral' },
     quantity: { type: Number, default: 1 },
-    price: { type: Number, default: 50 },
-    instructions: { type: String, default: '' }
+    price: { type: Number, default: 50 }
   }],
   status: { type: String, enum: ['PENDING', 'ISSUED'], default: 'PENDING' },
   issuedAt: { type: Date, default: null },
@@ -143,9 +98,8 @@ const prescriptionSchema = new mongoose.Schema({
 const billSchema = new mongoose.Schema({
   billId: { type: String, required: true, unique: true },
   patientId: { type: String, required: true, index: true },
-  patientName: { type: String, default: '' },
   prescriptionId: { type: String, default: null },
-  type: { type: String, enum: ['REGISTRATION', 'PHARMACY', 'LABORATORY', 'RADIOLOGY', 'PROCEDURE', 'IPD'], required: true },
+  type: { type: String, enum: ['REGISTRATION', 'PHARMACY'], required: true },
   items: [{
     name: String,
     quantity: Number,
@@ -153,23 +107,17 @@ const billSchema = new mongoose.Schema({
     total: Number
   }],
   totalAmount: { type: Number, required: true },
-  discount: { type: Number, default: 0 },
-  netAmount: { type: Number },
-  paymentMode: { type: String, enum: ['CASH', 'CARD', 'UPI', 'INSURANCE', 'PENDING'], default: 'PENDING' },
-  paymentStatus: { type: String, enum: ['PAID', 'PENDING', 'PARTIAL'], default: 'PENDING' },
-  gst: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 const activityLogSchema = new mongoose.Schema({
   action: { type: String, required: true },
   description: { type: String, required: true },
-  module: { type: String, default: 'general' },
-  userId: { type: String, default: '' },
   timestamp: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 const Doctor = mongoose.model('Doctor', doctorSchema);
+const Staff = mongoose.model('Staff', staffSchema);
 const Patient = mongoose.model('Patient', patientSchema);
 const Encounter = mongoose.model('Encounter', encounterSchema);
 const LabTest = mongoose.model('LabTest', labTestSchema);
@@ -178,9 +126,9 @@ const Bill = mongoose.model('Bill', billSchema);
 const ActivityLog = mongoose.model('ActivityLog', activityLogSchema);
 
 // ─── HELPER ───────────────────────────────────────────────────────────────────
-async function logActivity(action, description, module = 'general') {
+async function logActivity(action, description) {
   try {
-    await ActivityLog.create({ action, description, module });
+    await ActivityLog.create({ action, description });
   } catch (e) {
     console.error('Activity log error:', e.message);
   }
@@ -190,21 +138,91 @@ async function logActivity(action, description, module = 'general') {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    hospital: 'SIMS Hospital Chennai',
-    message: 'SIMS HMS Backend is running',
+    message: 'HMS Backend is running',
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
   });
 });
 
-app.get('/api/specializations', (req, res) => {
-  res.json(SIMS_SPECIALIZATIONS);
+// ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
+
+// Staff login (reception, lab, pharmacy, billing, admin)
+app.post('/api/auth/staff-login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+    const staff = await Staff.findOne({ username: username.trim() });
+    if (!staff) return res.status(401).json({ error: 'Invalid username or password' });
+    const match = await bcrypt.compare(password.trim(), staff.passwordHash);
+    if (!match) return res.status(401).json({ error: 'Invalid username or password' });
+    res.json({ success: true, user: { username: staff.username, role: staff.role, name: staff.name } });
+  } catch (e) {
+    res.status(500).json({ error: 'Login failed', details: e.message });
+  }
+});
+
+// Doctor login
+app.post('/api/auth/doctor-login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+    const doctor = await Doctor.findOne({ doctorId: username.trim() });
+    if (!doctor) return res.status(401).json({ error: 'Invalid doctor ID or password' });
+    const match = await bcrypt.compare(password.trim(), doctor.passwordHash);
+    if (!match) return res.status(401).json({ error: 'Invalid doctor ID or password' });
+    res.json({ success: true, user: { username: doctor.doctorId, role: 'doctor', name: doctor.name, specialization: doctor.specialization } });
+  } catch (e) {
+    res.status(500).json({ error: 'Login failed', details: e.message });
+  }
+});
+
+// Setup initial staff accounts (run once — admin protected by env secret)
+app.post('/api/auth/setup-staff', async (req, res) => {
+  try {
+    const { setupSecret, accounts } = req.body;
+    if (setupSecret !== process.env.SETUP_SECRET) return res.status(403).json({ error: 'Forbidden' });
+    const results = [];
+    for (const acc of accounts) {
+      const passwordHash = await bcrypt.hash(acc.password, 10);
+      const existing = await Staff.findOne({ username: acc.username });
+      if (existing) {
+        existing.passwordHash = passwordHash;
+        existing.name = acc.name;
+        existing.role = acc.role;
+        await existing.save();
+        results.push({ username: acc.username, action: 'updated' });
+      } else {
+        await Staff.create({ username: acc.username, passwordHash, role: acc.role, name: acc.name });
+        results.push({ username: acc.username, action: 'created' });
+      }
+    }
+    res.json({ success: true, results });
+  } catch (e) {
+    res.status(500).json({ error: 'Setup failed', details: e.message });
+  }
+});
+
+// Change staff password
+app.post('/api/auth/change-password', async (req, res) => {
+  try {
+    const { username, oldPassword, newPassword } = req.body;
+    const staff = await Staff.findOne({ username });
+    if (!staff) return res.status(404).json({ error: 'User not found' });
+    const match = await bcrypt.compare(oldPassword, staff.passwordHash);
+    if (!match) return res.status(401).json({ error: 'Current password incorrect' });
+    staff.passwordHash = await bcrypt.hash(newPassword, 10);
+    await staff.save();
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to change password', details: e.message });
+  }
 });
 
 // ─── DOCTOR ROUTES ────────────────────────────────────────────────────────────
+
 app.get('/api/doctors', async (req, res) => {
   try {
-    const doctors = await Doctor.find().sort({ registeredAt: -1 });
+    const doctors = await Doctor.find({}, { passwordHash: 0 }).sort({ registeredAt: -1 });
     res.json(doctors);
   } catch (e) {
     res.status(500).json({ error: 'Failed to fetch doctors', details: e.message });
@@ -213,12 +231,16 @@ app.get('/api/doctors', async (req, res) => {
 
 app.post('/api/doctors', async (req, res) => {
   try {
-    const { name, specialization, phone, email, qualification, department } = req.body;
+    const { name, specialization, phone, email, qualification, password } = req.body;
     if (!name || !specialization) return res.status(400).json({ error: 'Name and specialization are required' });
-    const doctorId = 'SIMS-DOC' + Date.now();
-    const doctor = await Doctor.create({ doctorId, name, specialization, phone, email, qualification, department });
-    await logActivity('Doctor Registered', `Dr. ${name} (${specialization}) registered`, 'admin');
-    res.status(201).json(doctor);
+    if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    const doctorId = 'DOC' + Date.now();
+    const passwordHash = await bcrypt.hash(password, 10);
+    const doctor = await Doctor.create({ doctorId, name, specialization, phone, email, qualification, passwordHash });
+    await logActivity('Doctor Registered', `Doctor ${doctorId} - ${name} (${specialization})`);
+    console.log(`✅ Doctor registered: ${name}`);
+    const { passwordHash: _, ...doctorData } = doctor.toObject();
+    res.status(201).json({ ...doctorData, loginId: doctorId });
   } catch (e) {
     if (e.name === 'ValidationError') return res.status(400).json({ error: 'Validation failed', details: e.message });
     res.status(500).json({ error: 'Failed to register doctor', details: e.message });
@@ -226,6 +248,7 @@ app.post('/api/doctors', async (req, res) => {
 });
 
 // ─── PATIENT ROUTES ───────────────────────────────────────────────────────────
+
 app.get('/api/patients', async (req, res) => {
   try {
     const patients = await Patient.find().sort({ registeredAt: -1 });
@@ -247,12 +270,7 @@ app.get('/api/patients/:id', async (req, res) => {
 
 app.post('/api/patients', async (req, res) => {
   try {
-    const {
-      firstName, lastName, age, gender, phone, address,
-      bloodGroup, emergencyContact, chiefComplaint, assignedDoctorId,
-      insuranceProvider, insurancePolicyNo, isIPD, wardBed
-    } = req.body;
-
+    const { firstName, lastName, age, gender, phone, address, chiefComplaint, assignedDoctorId } = req.body;
     if (!firstName || !age || !gender || !chiefComplaint) {
       return res.status(400).json({ error: 'First name, age, gender, and chief complaint are required' });
     }
@@ -260,29 +278,23 @@ app.post('/api/patients', async (req, res) => {
       return res.status(400).json({ error: 'Please assign a doctor to the patient' });
     }
 
-    const patientId = 'SIMS-PAT' + Date.now();
-    const patient = await Patient.create({
-      patientId, firstName, lastName, age, gender, phone, address,
-      bloodGroup, emergencyContact, chiefComplaint, assignedDoctorId,
-      insuranceProvider, insurancePolicyNo, isIPD: isIPD || false,
-      wardBed: wardBed || '', admittedAt: isIPD ? new Date() : null
-    });
+    const patientId = 'PAT' + Date.now();
 
-    // Auto-create registration bill (SIMS consultation: ₹800 OPD, ₹1500 IPD)
-    const consultFee = isIPD ? 1500 : 800;
-    const billId = 'SIMS-BILL' + Date.now();
+    // Create patient
+    const patient = await Patient.create({ patientId, firstName, lastName, age, gender, phone, address, chiefComplaint, assignedDoctorId });
+
+    // Auto-create registration bill
+    const billId = 'BILL' + Date.now();
     const bill = await Bill.create({
       billId,
       patientId,
-      patientName: `${firstName} ${lastName || ''}`.trim(),
       type: 'REGISTRATION',
-      items: [{ name: isIPD ? 'IPD Admission Fee' : 'OPD Consultation Fee', quantity: 1, price: consultFee, total: consultFee }],
-      totalAmount: consultFee,
-      netAmount: consultFee,
-      paymentStatus: 'PENDING'
+      items: [{ name: 'Consultation Fee', quantity: 1, price: 500, total: 500 }],
+      totalAmount: 500
     });
 
-    await logActivity('Patient Registered', `${patientId} - ${firstName} ${lastName || ''} → Dr. ${assignedDoctorId}`, 'reception');
+    await logActivity('Patient Registered', `Patient ${patientId} - ${firstName} ${lastName || ''}`);
+    console.log(`✅ Patient registered: ${firstName} ${lastName || ''}`);
     res.status(201).json({ patient, bill });
   } catch (e) {
     if (e.name === 'ValidationError') return res.status(400).json({ error: 'Validation failed', details: e.message });
@@ -291,6 +303,7 @@ app.post('/api/patients', async (req, res) => {
 });
 
 // ─── ENCOUNTER ROUTES ─────────────────────────────────────────────────────────
+
 app.get('/api/encounters', async (req, res) => {
   try {
     const encounters = await Encounter.find().sort({ createdAt: -1 });
@@ -311,17 +324,14 @@ app.get('/api/encounters/patient/:patientId', async (req, res) => {
 
 app.post('/api/encounters', async (req, res) => {
   try {
-    const { patientId, doctorName, specialization, diagnosis, icdCode, notes, vitals, followUpDate } = req.body;
+    const { patientId, doctorName, diagnosis, notes } = req.body;
     if (!patientId || !doctorName || !diagnosis) {
       return res.status(400).json({ error: 'Patient ID, doctor name, and diagnosis are required' });
     }
-    const encounterId = 'SIMS-ENC' + Date.now();
-    const encounter = await Encounter.create({
-      encounterId, patientId, doctorName, specialization: specialization || '',
-      diagnosis, icdCode: icdCode || '', notes: notes || '',
-      vitals: vitals || {}, followUpDate: followUpDate || null
-    });
-    await logActivity('Encounter Created', `${encounterId} by Dr. ${doctorName} for ${patientId}`, 'doctor');
+    const encounterId = 'ENC' + Date.now();
+    const encounter = await Encounter.create({ encounterId, patientId, doctorName, diagnosis, notes: notes || '' });
+    await logActivity('Encounter Created', `Encounter ${encounterId} by ${doctorName} for patient ${patientId}`);
+    console.log(`✅ Encounter created: ${encounterId}`);
     res.status(201).json(encounter);
   } catch (e) {
     res.status(500).json({ error: 'Failed to create encounter', details: e.message });
@@ -329,12 +339,11 @@ app.post('/api/encounters', async (req, res) => {
 });
 
 // ─── LAB TEST ROUTES ──────────────────────────────────────────────────────────
+
 app.get('/api/labtests', async (req, res) => {
   try {
-    const { status, urgency } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
-    if (urgency) filter.urgency = urgency;
+    const { status } = req.query;
+    const filter = status ? { status } : {};
     const tests = await LabTest.find(filter).sort({ orderedAt: -1 });
     res.json(tests);
   } catch (e) {
@@ -353,24 +362,17 @@ app.get('/api/labtests/encounter/:encounterId', async (req, res) => {
 
 app.post('/api/labtests/bulk', async (req, res) => {
   try {
-    const { encounterId, patientId, patientName, tests } = req.body;
+    const { encounterId, patientId, tests } = req.body;
     if (!encounterId || !patientId || !tests || !Array.isArray(tests)) {
       return res.status(400).json({ error: 'encounterId, patientId, and tests array are required' });
     }
     const created = [];
     for (const test of tests) {
-      const testId = 'SIMS-LAB' + Date.now() + Math.random().toString(36).substr(2, 4).toUpperCase();
-      const labTest = await LabTest.create({
-        testId, encounterId, patientId,
-        patientName: patientName || '',
-        testName: test.testName,
-        testCategory: test.testCategory || 'General',
-        urgency: test.urgency || 'ROUTINE',
-        referenceRange: test.referenceRange || ''
-      });
+      const testId = 'TEST' + Date.now() + Math.random().toString(36).substr(2, 5);
+      const labTest = await LabTest.create({ testId, encounterId, patientId, testName: test.testName });
       created.push(labTest);
     }
-    await logActivity('Lab Tests Ordered', `${tests.length} test(s) for ${patientId} (Encounter: ${encounterId})`, 'lab');
+    await logActivity('Lab Tests Ordered', `${tests.length} tests ordered for encounter ${encounterId}`);
     res.status(201).json(created);
   } catch (e) {
     res.status(500).json({ error: 'Failed to order lab tests', details: e.message });
@@ -379,15 +381,16 @@ app.post('/api/labtests/bulk', async (req, res) => {
 
 app.put('/api/labtests/:testId/result', async (req, res) => {
   try {
-    const { result, remarks, referenceRange } = req.body;
+    const { result } = req.body;
     if (!result || !result.trim()) return res.status(400).json({ error: 'Result is required' });
     const test = await LabTest.findOneAndUpdate(
       { testId: req.params.testId },
-      { result, remarks: remarks || '', referenceRange: referenceRange || '', status: 'COMPLETED', completedAt: new Date() },
+      { result, status: 'COMPLETED', completedAt: new Date() },
       { new: true }
     );
     if (!test) return res.status(404).json({ error: 'Lab test not found' });
-    await logActivity('Lab Result Submitted', `${test.testName} for patient ${test.patientId} — Result entered`, 'lab');
+    await logActivity('Lab Test Completed', `Test ${test.testId} (${test.testName}) completed for patient ${test.patientId}`);
+    console.log(`✅ Lab test completed: ${test.testName}`);
     res.json(test);
   } catch (e) {
     res.status(500).json({ error: 'Failed to update test result', details: e.message });
@@ -395,6 +398,7 @@ app.put('/api/labtests/:testId/result', async (req, res) => {
 });
 
 // ─── PRESCRIPTION ROUTES ──────────────────────────────────────────────────────
+
 app.get('/api/prescriptions', async (req, res) => {
   try {
     const { status } = req.query;
@@ -408,18 +412,14 @@ app.get('/api/prescriptions', async (req, res) => {
 
 app.post('/api/prescriptions', async (req, res) => {
   try {
-    const { encounterId, patientId, patientName, doctorName, medicines } = req.body;
+    const { encounterId, patientId, medicines } = req.body;
     if (!encounterId || !patientId || !medicines || medicines.length === 0) {
       return res.status(400).json({ error: 'encounterId, patientId, and medicines are required' });
     }
-    const prescriptionId = 'SIMS-RX' + Date.now();
-    const prescription = await Prescription.create({
-      prescriptionId, encounterId, patientId,
-      patientName: patientName || '',
-      doctorName: doctorName || '',
-      medicines
-    });
-    await logActivity('Prescription Created', `${prescriptionId} — ${medicines.length} medicine(s) for ${patientId}`, 'doctor');
+    const prescriptionId = 'PRESC' + Date.now();
+    const prescription = await Prescription.create({ prescriptionId, encounterId, patientId, medicines });
+    await logActivity('Prescription Created', `Prescription ${prescriptionId} for encounter ${encounterId} with ${medicines.length} medicines`);
+    console.log(`✅ Prescription created: ${prescriptionId}`);
     res.status(201).json(prescription);
   } catch (e) {
     res.status(500).json({ error: 'Failed to create prescription', details: e.message });
@@ -433,7 +433,8 @@ app.put('/api/prescriptions/:prescriptionId/issue', async (req, res) => {
     if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
     if (prescription.status === 'ISSUED') return res.status(400).json({ error: 'Prescription already issued' });
 
-    const billId = 'SIMS-BILL' + Date.now();
+    // Build pharmacy bill
+    const billId = 'BILL' + Date.now();
     const items = medicines.map(med => ({
       name: med.medicineName,
       quantity: med.quantity,
@@ -445,20 +446,19 @@ app.put('/api/prescriptions/:prescriptionId/issue', async (req, res) => {
     const bill = await Bill.create({
       billId,
       patientId: prescription.patientId,
-      patientName: prescription.patientName,
       prescriptionId: prescription.prescriptionId,
       type: 'PHARMACY',
       items,
-      totalAmount,
-      netAmount: totalAmount,
-      paymentStatus: 'PENDING'
+      totalAmount
     });
 
+    // Mark prescription as issued
     prescription.status = 'ISSUED';
     prescription.issuedAt = new Date();
     await prescription.save();
 
-    await logActivity('Medicines Dispensed', `Rx ${prescription.prescriptionId} issued — ₹${totalAmount}`, 'pharmacy');
+    await logActivity('Medicines Issued', `Prescription ${prescription.prescriptionId} issued — Bill ₹${totalAmount}`);
+    console.log(`✅ Medicines issued: ${prescription.prescriptionId}`);
     res.json({ prescription, bill });
   } catch (e) {
     res.status(500).json({ error: 'Failed to issue medicines', details: e.message });
@@ -466,6 +466,7 @@ app.put('/api/prescriptions/:prescriptionId/issue', async (req, res) => {
 });
 
 // ─── BILLING ROUTES ───────────────────────────────────────────────────────────
+
 app.get('/api/bills', async (req, res) => {
   try {
     const bills = await Bill.find().sort({ createdAt: -1 });
@@ -484,31 +485,15 @@ app.get('/api/bills/patient/:patientId', async (req, res) => {
   }
 });
 
-app.put('/api/bills/:billId/pay', async (req, res) => {
-  try {
-    const { paymentMode, discount } = req.body;
-    const bill = await Bill.findOne({ billId: req.params.billId });
-    if (!bill) return res.status(404).json({ error: 'Bill not found' });
-    bill.paymentMode = paymentMode || 'CASH';
-    bill.paymentStatus = 'PAID';
-    bill.discount = discount || 0;
-    bill.netAmount = bill.totalAmount - (discount || 0);
-    await bill.save();
-    await logActivity('Payment Received', `Bill ${bill.billId} — ₹${bill.netAmount} via ${bill.paymentMode}`, 'billing');
-    res.json(bill);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to process payment', details: e.message });
-  }
-});
+// ─── ADMIN / STATS ROUTES ─────────────────────────────────────────────────────
 
-// ─── ADMIN / STATS ─────────────────────────────────────────────────────────────
 app.get('/api/stats', async (req, res) => {
   try {
     const [
       totalPatients, totalEncounters, totalTests,
       pendingTests, completedTests,
       totalPrescriptions, pendingPrescriptions, issuedPrescriptions,
-      totalBills, bills, recentActivity, totalDoctors, ipdPatients
+      totalBills, bills, recentActivity
     ] = await Promise.all([
       Patient.countDocuments(),
       Encounter.countDocuments(),
@@ -519,19 +504,17 @@ app.get('/api/stats', async (req, res) => {
       Prescription.countDocuments({ status: 'PENDING' }),
       Prescription.countDocuments({ status: 'ISSUED' }),
       Bill.countDocuments(),
-      Bill.find({ paymentStatus: 'PAID' }),
-      ActivityLog.find().sort({ timestamp: -1 }).limit(20),
-      Doctor.countDocuments(),
-      Patient.countDocuments({ isIPD: true })
+      Bill.find(),
+      ActivityLog.find().sort({ timestamp: -1 }).limit(15)
     ]);
 
-    const totalRevenue = bills.reduce((sum, b) => sum + (b.netAmount || b.totalAmount), 0);
+    const totalRevenue = bills.reduce((sum, b) => sum + b.totalAmount, 0);
 
     res.json({
       totalPatients, totalEncounters, totalTests,
       pendingTests, completedTests,
       totalPrescriptions, pendingPrescriptions, issuedPrescriptions,
-      totalBills, totalRevenue, totalDoctors, ipdPatients,
+      totalBills, totalRevenue,
       recentActivity
     });
   } catch (e) {
@@ -548,14 +531,15 @@ app.get('/api/activitylog', async (req, res) => {
   }
 });
 
-// ─── 404 & ERROR ──────────────────────────────────────────────────────────────
+// ─── 404 & ERROR HANDLERS ─────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: `Route ${req.method} ${req.path} not found` }));
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
 
+// ─── Start Server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`🏥 SIMS Hospital HMS Backend running on port ${PORT}`);
+  console.log(`🏥 HMS Backend running on port ${PORT}`);
   console.log(`📡 API: http://localhost:${PORT}/api`);
 });
