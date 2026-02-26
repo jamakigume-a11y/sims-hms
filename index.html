@@ -37,12 +37,10 @@
 
         h1, h2, h3, h4, h5, .font-display { font-family: 'Outfit', sans-serif; }
 
-        /* ── Scrollbar ── */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: var(--sims-gray); }
         ::-webkit-scrollbar-thumb { background: var(--sims-navy); border-radius: 4px; }
 
-        /* ── Sidebar ── */
         .sims-sidebar {
             width: var(--sidebar-w);
             background: var(--sims-navy-dark);
@@ -127,7 +125,6 @@
 
         .sims-nav-item.active .nav-badge { background: rgba(255,255,255,0.3); color: white; }
 
-        /* ── User card in sidebar ── */
         .sims-user-card {
             margin: 12px; padding: 12px;
             background: rgba(255,255,255,0.06);
@@ -142,14 +139,12 @@
             flex-shrink: 0;
         }
 
-        /* ── Main content ── */
         .sims-main {
             margin-left: var(--sidebar-w);
             min-height: 100vh;
             display: flex; flex-direction: column;
         }
 
-        /* ── Top bar ── */
         .sims-topbar {
             background: white;
             height: 60px;
@@ -172,7 +167,6 @@
             font-size: 12px; color: var(--sims-text-muted);
         }
 
-        /* ── Cards ── */
         .sims-card {
             background: white;
             border-radius: 16px;
@@ -192,7 +186,6 @@
             color: var(--sims-navy-dark);
         }
 
-        /* ── Stat cards ── */
         .stat-card {
             background: white;
             border-radius: 14px;
@@ -235,7 +228,6 @@
             font-size: 20px;
         }
 
-        /* ── Buttons ── */
         .btn-primary {
             background: var(--sims-navy);
             color: white;
@@ -290,7 +282,6 @@
 
         .btn-sm { padding: 5px 12px !important; font-size: 12px !important; }
 
-        /* ── Form inputs ── */
         .sims-input {
             width: 100%;
             border: 1.5px solid var(--sims-gray);
@@ -314,7 +305,6 @@
             display: block; margin-bottom: 5px;
         }
 
-        /* ── Table ── */
         .sims-table { width: 100%; border-collapse: collapse; }
         .sims-table th {
             background: var(--sims-gray-light);
@@ -332,7 +322,6 @@
         .sims-table tr:last-child td { border-bottom: none; }
         .sims-table tr:hover td { background: var(--sims-gray-light); }
 
-        /* ── Badges ── */
         .badge {
             display: inline-flex; align-items: center; gap: 4px;
             padding: 3px 9px; border-radius: 20px;
@@ -347,7 +336,6 @@
         .badge-teal { background: #ecfeff; color: #0891b2; }
         .badge-orange { background: #fff7ed; color: #ea580c; }
 
-        /* ── Modal ── */
         .sims-modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,20,60,0.55); backdrop-filter: blur(3px);
@@ -388,7 +376,6 @@
             display: flex; justify-content: flex-end; gap: 10px;
         }
 
-        /* ── Alert ── */
         .sims-alert {
             padding: 10px 14px; border-radius: 10px;
             font-size: 13px; display: flex; align-items: flex-start; gap: 8px;
@@ -399,7 +386,6 @@
         .sims-alert-info { background: #e8eef8; color: var(--sims-navy); border-left: 3px solid var(--sims-navy); }
         .sims-alert-warning { background: #fffbeb; color: #d97706; border-left: 3px solid #d97706; }
 
-        /* ── Login page ── */
         .login-bg {
             min-height: 100vh;
             background: var(--sims-navy-dark);
@@ -439,13 +425,11 @@
 
         .login-body { padding: 24px 32px 32px; }
 
-        /* ── Content area ── */
         .sims-content {
             padding: 24px 28px;
             flex: 1;
         }
 
-        /* ── Page header ── */
         .page-header {
             margin-bottom: 20px;
             display: flex; align-items: flex-start; justify-content: space-between;
@@ -464,13 +448,11 @@
             margin-top: 2px;
         }
 
-        /* ── Grid ── */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
         .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
 
-        /* ── Loading spinner ── */
         .spinner {
             width: 32px; height: 32px;
             border: 3px solid var(--sims-gray);
@@ -481,7 +463,6 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Activity item ── */
         .activity-item {
             display: flex; align-items: flex-start; gap: 10px;
             padding: 10px 0;
@@ -493,7 +474,6 @@
             background: var(--sims-navy); flex-shrink: 0; margin-top: 5px;
         }
 
-        /* ── Patient ID chip ── */
         .patient-chip {
             font-family: 'Outfit', sans-serif;
             font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
@@ -501,7 +481,6 @@
             padding: 2px 8px; border-radius: 6px; display: inline-block;
         }
 
-        /* ── SIMS watermark strip ── */
         .sims-topbar-brand {
             display: flex; align-items: center; gap: 8px;
             padding: 0 16px;
@@ -509,7 +488,6 @@
             color: var(--sims-text-muted); font-size: 12px;
         }
 
-        /* ── Role quick-fill chips ── */
         .role-chip {
             display: inline-block; padding: 4px 10px;
             border-radius: 7px; cursor: pointer;
@@ -521,7 +499,6 @@
         }
         .role-chip:hover { background: var(--sims-navy); color: white; border-color: var(--sims-navy); }
 
-        /* ── Empty state ── */
         .empty-state {
             text-align: center; padding: 48px 20px;
         }
@@ -529,7 +506,6 @@
         .empty-state-title { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--sims-text-muted); }
         .empty-state-text { font-size: 13px; color: #aab4c8; margin-top: 4px; }
 
-        /* ── Divider with text ── */
         .divider-text {
             display: flex; align-items: center; gap: 10px;
             margin: 16px 0 12px;
@@ -540,13 +516,11 @@
             content: ''; flex: 1; height: 1px; background: var(--sims-gray);
         }
 
-        /* ── SIMS red accent line ── */
         .section-accent {
             width: 36px; height: 3px; background: var(--sims-red);
             border-radius: 2px; margin-bottom: 8px;
         }
 
-        /* ── Tab system ── */
         .sims-tabs {
             display: flex; gap: 4px;
             background: var(--sims-gray-light);
@@ -565,7 +539,6 @@
             box-shadow: 0 1px 6px rgba(0,48,135,0.12);
         }
 
-        /* ── Vitals grid ── */
         .vital-box {
             background: var(--sims-gray-light);
             border-radius: 10px; padding: 10px;
@@ -574,13 +547,11 @@
         .vital-value { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; color: var(--sims-navy-dark); }
         .vital-label { font-size: 10px; color: var(--sims-text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
-        /* ── Print helper ── */
         @media print {
             .sims-sidebar, .sims-topbar, .btn-primary, .btn-red, .btn-outline { display: none !important; }
             .sims-main { margin-left: 0 !important; }
         }
 
-        /* ── Mobile (basic) ── */
         @media (max-width: 768px) {
             .sims-sidebar { transform: translateX(-100%); }
             .sims-main { margin-left: 0; }
@@ -588,7 +559,6 @@
             .grid-6 { grid-template-columns: repeat(3, 1fr); }
         }
 
-        /* ── Fade in animation ── */
         .fade-in {
             animation: fadeIn 0.3s ease;
         }
@@ -597,7 +567,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ─── Search bar ─── */
         .search-wrap {
             position: relative; flex: 1; max-width: 320px;
         }
@@ -627,11 +596,6 @@
     <script type="text/babel">
         const { useState, useEffect, useCallback, useRef } = React;
 
-        // ═══════════════════════════════════════════════════
-        // AUTH
-        // ═══════════════════════════════════════════════════
-
-        // ── Department staff (non-doctor roles) ──
         const DEPT_USERS = {
             reception: { username: 'reception', password: 'Recept@2024#Secure', role: 'reception', name: 'Reception Desk',   dept: 'Out-Patient' },
             lab:       { username: 'lab',        password: 'LabTest@2024#Secure', role: 'lab',       name: 'Laboratory',       dept: 'Diagnostics' },
@@ -640,8 +604,6 @@
             admin:     { username: 'admin',      password: 'Admin@2024#Secure',   role: 'admin',     name: 'Administrator',    dept: 'Management' },
         };
 
-        // ── SIMS Doctor roster — each doctor has individual credentials ──
-        // To add a doctor: { name: 'Dr. Full Name', specialization: '...', password: 'SecurePass' }
         const DOCTORS = [
             { name: 'Dr. Arjun Mehta',       specialization: 'Cardiology & Cardiac Surgery',    password: 'ArjunMehta@2024' },
             { name: 'Dr. Priya Raghavan',    specialization: 'Neurology & Neurosurgery',         password: 'PriyaR@2024' },
@@ -688,11 +650,11 @@
         }
 
         // ═══════════════════════════════════════════════════
-        // API LAYER
+        // API LAYER — FIXED URL pointing to your Render backend
         // ═══════════════════════════════════════════════════
         const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
             ? 'http://localhost:3000/api'
-            : 'https://YOUR-RENDER-APP.onrender.com/api'; // ← CHANGE after Render deploy
+            : 'https://sims-hms.onrender.com/api';
 
         const api = async (method, path, body) => {
             const opts = { method, headers: { 'Content-Type': 'application/json' }, cache: 'no-store' };
@@ -704,42 +666,31 @@
 
         const API = {
             health:         ()           => api('GET',  '/health'),
-            // Doctors
             getDoctors:     ()           => api('GET',  '/doctors'),
             addDoctor:      (d)          => api('POST', '/doctors', d),
-            // Patients
             getPatients:    ()           => api('GET',  '/patients'),
             getPatient:     (id)         => api('GET',  `/patients/${id}`),
             addPatient:     (d)          => api('POST', '/patients', d),
-            // Encounters
             getEncounters:  ()           => api('GET',  '/encounters'),
             getEncountersByPat: (pid)    => api('GET',  `/encounters/patient/${pid}`),
             addEncounter:   (d)          => api('POST', '/encounters', d),
-            // Lab
             getLabTests:    (q)          => api('GET',  `/labtests${q||''}`),
             getLabByEnc:    (eid)        => api('GET',  `/labtests/encounter/${eid}`),
             orderLab:       (d)          => api('POST', '/labtests/bulk', d),
             submitResult:   (tid, r)     => api('PUT',  `/labtests/${tid}/result`, r),
-            // Prescription
             getRx:          (q)          => api('GET',  `/prescriptions${q||''}`),
             addRx:          (d)          => api('POST', '/prescriptions', d),
             issueRx:        (id, meds)   => api('PUT',  `/prescriptions/${id}/issue`, { medicines: meds }),
-            // Billing
             getBills:       ()           => api('GET',  '/bills'),
             getBillsByPat:  (pid)        => api('GET',  `/bills/patient/${pid}`),
             payBill:        (id, d)      => api('PUT',  `/bills/${id}/pay`, d),
-            // Stats
             getStats:       ()           => api('GET',  '/stats'),
             getActivity:    ()           => api('GET',  '/activitylog'),
         };
 
-        // Warm up server
         API.health().catch(() => console.warn('Backend waking...'));
         setInterval(() => API.health().catch(()=>{}), 10 * 60 * 1000);
 
-        // ═══════════════════════════════════════════════════
-        // CONSTANTS
-        // ═══════════════════════════════════════════════════
         const SPECIALIZATIONS = [
             'Cardiology & Cardiac Surgery','Neurology & Neurosurgery','Nephrology & Urology',
             'Gastroenterology & Hepatology','Orthopaedics & Joint Replacement','Oncology & Cancer Care',
@@ -792,9 +743,6 @@
             'Vitamin D3 60000 IU', 'B-Complex', 'Iron + Folic Acid',
         ];
 
-        // ═══════════════════════════════════════════════════
-        // UTILITIES
-        // ═══════════════════════════════════════════════════
         const fmt = {
             date: (d) => d ? new Date(d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : '—',
             time: (d) => d ? new Date(d).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' }) : '—',
@@ -811,10 +759,6 @@
             reception: '#0891b2', doctor: '#003087', lab: '#7c3aed',
             pharmacy: '#059669', billing: '#d97706', admin: '#c8102e', general: '#6b7280'
         }[m] || '#6b7280');
-
-        // ═══════════════════════════════════════════════════
-        // SHARED COMPONENTS
-        // ═══════════════════════════════════════════════════
 
         function Spinner() {
             return <div className="flex items-center justify-center py-12">
@@ -877,15 +821,10 @@
             return <span className={`badge ${cls}`}>{label}</span>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // LOGIN PAGE
-        // ═══════════════════════════════════════════════════
         function LoginPage({ onLogin }) {
-            const [mode, setMode] = useState('doctor'); // 'doctor' | 'dept'
-            // Doctor login state
+            const [mode, setMode] = useState('doctor');
             const [docName, setDocName] = useState('');
             const [docPass, setDocPass] = useState('');
-            // Dept login state
             const [u, setU] = useState('');
             const [p, setP] = useState('');
             const [show, setShow] = useState(false);
@@ -924,11 +863,7 @@
             ];
 
             return <div className="login-bg">
-                <div style={{ position:'absolute', top:'-80px', right:'-80px', width:320, height:320, borderRadius:'50%', border:'1.5px solid rgba(255,255,255,0.06)' }}></div>
-                <div style={{ position:'absolute', bottom:'-60px', left:'-60px', width:240, height:240, borderRadius:'50%', border:'1.5px solid rgba(200,16,46,0.15)' }}></div>
-
                 <div className="login-card fade-in" style={{ margin: '20px auto' }}>
-                    {/* Header */}
                     <div className="login-header">
                         <div className="sims-logo-badge" style={{ justifyContent:'center', marginBottom:12 }}>
                             <div className="sims-logo-icon" style={{ width:56, height:56, fontSize:28 }}>🏥</div>
@@ -941,7 +876,6 @@
                     </div>
 
                     <div className="login-body">
-                        {/* Mode toggle */}
                         <div className="sims-tabs" style={{ marginBottom:16 }}>
                             <div className={`sims-tab ${mode==='doctor'?'active':''}`} onClick={()=>{ setMode('doctor'); setErr(''); }}>👨‍⚕️ Doctor Login</div>
                             <div className={`sims-tab ${mode==='dept'?'active':''}`} onClick={()=>{ setMode('dept'); setErr(''); }}>🏢 Department Login</div>
@@ -968,9 +902,6 @@
                                 <button type="submit" className="btn-red" disabled={loading || !docName} style={{ width:'100%', justifyContent:'center', padding:'11px', fontSize:14, marginTop:6 }}>
                                     {loading ? 'Signing in...' : '→ Sign In as Doctor'}
                                 </button>
-                                <div style={{ marginTop:10, padding:'10px 12px', background:'var(--sims-gray-light)', borderRadius:10, fontSize:11.5, color:'var(--sims-text-muted)' }}>
-                                    <strong>Each doctor has a personal password.</strong> Select your name, then enter your individual password. Contact Admin to reset or add new doctors.
-                                </div>
                             </form>
                         ) : (
                             <form onSubmit={submitDept}>
@@ -1003,9 +934,6 @@
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // SIDEBAR
-        // ═══════════════════════════════════════════════════
         function Sidebar({ active, onNav, user, onLogout, badges }) {
             const navItems = [
                 { id:'dashboard', icon:'📊', label:'Dashboard', roles:['admin'] },
@@ -1019,7 +947,6 @@
             const visible = navItems.filter(n => n.roles.includes(user.role));
 
             return <div className="sims-sidebar">
-                {/* Logo */}
                 <div className="sims-logo-area">
                     <div className="sims-logo-badge">
                         <div className="sims-logo-icon">🏥</div>
@@ -1033,7 +960,6 @@
                     </div>
                 </div>
 
-                {/* Navigation */}
                 <nav className="sims-nav">
                     <div className="sims-nav-label">Modules</div>
                     {visible.map(item => (
@@ -1055,7 +981,6 @@
                     </div>
                 </nav>
 
-                {/* User Card */}
                 <div className="sims-user-card">
                     <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
                         <div className="sims-user-avatar">{user.name[0]}</div>
@@ -1071,9 +996,6 @@
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // TOP BAR
-        // ═══════════════════════════════════════════════════
         function TopBar({ title, subtitle, user }) {
             const now = new Date();
             return <div className="sims-topbar">
@@ -1093,9 +1015,6 @@
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // DASHBOARD MODULE
-        // ═══════════════════════════════════════════════════
         function Dashboard() {
             const [stats, setStats] = useState(null);
             const [loading, setLoading] = useState(true);
@@ -1140,7 +1059,6 @@
                 </div>
 
                 <div style={{ display:'grid', gridTemplateColumns:'1fr 380px', gap:20 }}>
-                    {/* Activity Feed */}
                     <div className="sims-card">
                         <div className="sims-card-header">
                             <div className="sims-card-title">Recent Activity</div>
@@ -1160,7 +1078,6 @@
                         </div>
                     </div>
 
-                    {/* Summary panel */}
                     <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
                         <div className="sims-card" style={{ padding:'18px 20px' }}>
                             <div style={{ fontFamily:"'Outfit',sans-serif", fontSize:14, fontWeight:700, color:'var(--sims-navy-dark)', marginBottom:14 }}>Lab Summary</div>
@@ -1183,44 +1100,23 @@
                             </div>
                         </div>
 
-                        <div className="sims-card" style={{ padding:'18px 20px' }}>
-                            <div style={{ fontFamily:"'Outfit',sans-serif", fontSize:14, fontWeight:700, color:'var(--sims-navy-dark)', marginBottom:14 }}>Prescription Summary</div>
-                            <div style={{ display:'flex', gap:12 }}>
-                                <div style={{ flex:1, background:'#ecfdf5', borderRadius:8, padding:'8px 10px', textAlign:'center' }}>
-                                    <div style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:18, color:'#059669' }}>{stats.issuedPrescriptions}</div>
-                                    <div style={{ fontSize:10, color:'#059669' }}>Issued</div>
-                                </div>
-                                <div style={{ flex:1, background:'#fffbeb', borderRadius:8, padding:'8px 10px', textAlign:'center' }}>
-                                    <div style={{ fontFamily:"'Outfit',sans-serif", fontWeight:800, fontSize:18, color:'#d97706' }}>{stats.pendingPrescriptions}</div>
-                                    <div style={{ fontSize:10, color:'#d97706' }}>Pending</div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div className="sims-card" style={{ padding:'18px 20px', background:'var(--sims-navy-dark)' }}>
                             <div style={{ fontFamily:"'Outfit',sans-serif", fontSize:13, fontWeight:700, color:'rgba(255,255,255,0.7)', marginBottom:4 }}>SIMS Emergency Line</div>
                             <div style={{ fontFamily:"'Outfit',sans-serif", fontSize:22, fontWeight:800, color:'white' }}>+91 44 2000 2020</div>
                             <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)', marginTop:4 }}>24 × 7 Emergency Services</div>
-                            <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid rgba(255,255,255,0.1)', fontSize:12, color:'rgba(255,255,255,0.55)' }}>
-                                Appt: +91 44 2000 2001<br/>
-                                No.1, JN Salai, Vadapalani, Chennai – 600 026
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // RECEPTION MODULE
-        // ═══════════════════════════════════════════════════
         function Reception() {
             const [tab, setTab] = useState('patients');
             const [patients, setPatients] = useState([]);
             const [doctors, setDoctors] = useState([]);
             const [search, setSearch] = useState('');
             const [loading, setLoading] = useState(true);
-            const [modal, setModal] = useState(null); // 'register' | 'addDoc'
+            const [modal, setModal] = useState(null);
             const [form, setForm] = useState({});
             const [err, setErr] = useState('');
             const [submitting, setSubmitting] = useState(false);
@@ -1280,14 +1176,9 @@
                     </div>
                 </div>
 
-                {/* Tabs */}
                 <div className="sims-tabs">
-                    <div className={`sims-tab ${tab==='patients'?'active':''}`} onClick={()=>setTab('patients')}>
-                        🧑‍⚕️ Patients ({patients.length})
-                    </div>
-                    <div className={`sims-tab ${tab==='doctors'?'active':''}`} onClick={()=>setTab('doctors')}>
-                        👨‍⚕️ Doctors ({doctors.length})
-                    </div>
+                    <div className={`sims-tab ${tab==='patients'?'active':''}`} onClick={()=>setTab('patients')}>🧑‍⚕️ Patients ({patients.length})</div>
+                    <div className={`sims-tab ${tab==='doctors'?'active':''}`} onClick={()=>setTab('doctors')}>👨‍⚕️ Doctors ({doctors.length})</div>
                 </div>
 
                 {tab === 'patients' && <>
@@ -1357,7 +1248,6 @@
                     </div>
                 )}
 
-                {/* Register Patient Modal */}
                 <Modal open={modal==='register'} onClose={()=>setModal(null)} title="Register New Patient" large
                     footer={!newPatient && <>
                         <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
@@ -1398,7 +1288,6 @@
                             <FormField label="Emergency Contact"><input className="sims-input" value={form.emergencyContact||''} onChange={e=>f('emergencyContact',e.target.value)} placeholder="Name & Number" /></FormField>
                             <FormField label="Address"><input className="sims-input" value={form.address||''} onChange={e=>f('address',e.target.value)} placeholder="Address" /></FormField>
                         </div>
-
                         <div className="divider-text">Clinical</div>
                         <FormField label="Chief Complaint / Presenting Symptoms" required>
                             <textarea className="sims-input" rows={2} value={form.chiefComplaint||''} onChange={e=>f('chiefComplaint',e.target.value)} placeholder="Main complaint / reason for visit" style={{ resize:'vertical' }} />
@@ -1409,7 +1298,6 @@
                                 {doctors.map(d => <option key={d.doctorId} value={d.doctorId}>Dr. {d.name} — {d.specialization}</option>)}
                             </select>
                         </FormField>
-
                         <div className="divider-text">Insurance & Admission</div>
                         <div className="grid-2">
                             <FormField label="Insurance Provider"><input className="sims-input" value={form.insuranceProvider||''} onChange={e=>f('insuranceProvider',e.target.value)} placeholder="e.g. Star Health" /></FormField>
@@ -1423,7 +1311,6 @@
                     </>)}
                 </Modal>
 
-                {/* Add Doctor Modal */}
                 <Modal open={modal==='addDoc'} onClose={()=>setModal(null)} title="Register New Doctor"
                     footer={<>
                         <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
@@ -1449,9 +1336,6 @@
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // DOCTOR MODULE
-        // ═══════════════════════════════════════════════════
         function DoctorPortal() {
             const [patients, setPatients] = useState([]);
             const [search, setSearch] = useState('');
@@ -1477,7 +1361,7 @@
                 setCurrentEnc(null);
                 const [encs, labs] = await Promise.all([
                     API.getEncountersByPat(p.patientId),
-                    API.getLabTests(`?`).catch(()=>[])
+                    API.getLabTests('?').catch(()=>[])
                 ]);
                 setEncounters(encs);
                 setLabTests(labs.filter(l => l.patientId === p.patientId));
@@ -1550,7 +1434,6 @@
             );
 
             return <div className="fade-in" style={{ display:'grid', gridTemplateColumns:'300px 1fr', gap:20, height:'calc(100vh - 120px)' }}>
-                {/* Patient list panel */}
                 <div>
                     <div style={{ marginBottom:12 }}>
                         <div style={{ fontFamily:"'Outfit',sans-serif", fontSize:16, fontWeight:700, color:'var(--sims-navy-dark)', marginBottom:10 }}>Select Patient</div>
@@ -1562,14 +1445,8 @@
                     <div style={{ overflowY:'auto', height:'calc(100% - 80px)', display:'flex', flexDirection:'column', gap:8 }}>
                         {loading ? <Spinner /> : filtered.length === 0 ? <EmptyState icon="🔍" title="No patients found" /> :
                             filtered.map(p => (
-                                <div key={p._id}
-                                    onClick={()=>selectPatient(p)}
-                                    style={{
-                                        background: selectedPat?.patientId===p.patientId ? 'var(--sims-navy-dark)' : 'white',
-                                        borderRadius:12, padding:'12px 14px', cursor:'pointer',
-                                        border:`1.5px solid ${selectedPat?.patientId===p.patientId ? 'var(--sims-navy-dark)':'var(--sims-gray)'}`,
-                                        transition:'all 0.2s'
-                                    }}>
+                                <div key={p._id} onClick={()=>selectPatient(p)}
+                                    style={{ background: selectedPat?.patientId===p.patientId ? 'var(--sims-navy-dark)' : 'white', borderRadius:12, padding:'12px 14px', cursor:'pointer', border:`1.5px solid ${selectedPat?.patientId===p.patientId ? 'var(--sims-navy-dark)':'var(--sims-gray)'}`, transition:'all 0.2s' }}>
                                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
                                         <div style={{ fontWeight:600, fontSize:13.5, color: selectedPat?.patientId===p.patientId ? 'white':'var(--sims-text)' }}>{p.firstName} {p.lastName}</div>
                                         <span className={`badge ${p.isIPD ? 'badge-orange':'badge-navy'}`} style={{ fontSize:10 }}>{p.isIPD?'IPD':'OPD'}</span>
@@ -1582,14 +1459,12 @@
                     </div>
                 </div>
 
-                {/* Right panel */}
                 <div style={{ overflowY:'auto' }}>
                     {!selectedPat ? (
                         <div className="sims-card" style={{ height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
                             <EmptyState icon="👆" title="Select a patient from the left" text="Patient details, encounters and actions will appear here" />
                         </div>
                     ) : (<>
-                        {/* Patient Header */}
                         <div className="sims-card" style={{ marginBottom:16, padding:'16px 20px' }}>
                             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12 }}>
                                 <div style={{ display:'flex', alignItems:'center', gap:14 }}>
@@ -1607,30 +1482,15 @@
                                     </div>
                                 </div>
                                 <div style={{ display:'flex', gap:10 }}>
-                                    <button className="btn-outline btn-sm" onClick={()=>{ const cu=AuthService.getCurrentUser(); setErr(''); setSuccess(''); setForm({ doctorName: cu?.name||'', specialization: cu?.specialization||'', vitals:{} }); setModal('encounter'); }}>
-                                        📋 New Encounter
-                                    </button>
-                                    <button className="btn-outline btn-sm" onClick={()=>{ setErr(''); setLabForm({ tests:[], urgency:'ROUTINE' }); setModal('lab'); }}
-                                        disabled={encounters.length===0}>
-                                        🧪 Order Labs
-                                    </button>
-                                    <button className="btn-primary btn-sm" onClick={()=>{ setErr(''); setRxForm({ medicines:[] }); addMedicine(); setModal('prescription'); }}
-                                        disabled={encounters.length===0}>
-                                        💊 Prescription
-                                    </button>
+                                    <button className="btn-outline btn-sm" onClick={()=>{ const cu=AuthService.getCurrentUser(); setErr(''); setSuccess(''); setForm({ doctorName: cu?.name||'', specialization: cu?.specialization||'', vitals:{} }); setModal('encounter'); }}>📋 New Encounter</button>
+                                    <button className="btn-outline btn-sm" onClick={()=>{ setErr(''); setLabForm({ tests:[], urgency:'ROUTINE' }); setModal('lab'); }} disabled={encounters.length===0}>🧪 Order Labs</button>
+                                    <button className="btn-primary btn-sm" onClick={()=>{ setErr(''); setRxForm({ medicines:[] }); addMedicine(); setModal('prescription'); }} disabled={encounters.length===0}>💊 Prescription</button>
                                 </div>
-                            </div>
-                            <div style={{ display:'flex', gap:20, marginTop:12, paddingTop:12, borderTop:'1px solid var(--sims-gray)', fontSize:12, color:'var(--sims-text-muted)' }}>
-                                {selectedPat.phone && <span>📞 {selectedPat.phone}</span>}
-                                {selectedPat.address && <span>📍 {selectedPat.address}</span>}
-                                {selectedPat.insuranceProvider && <span>🏦 {selectedPat.insuranceProvider}</span>}
-                                <span>Registered: {fmt.date(selectedPat.registeredAt)}</span>
                             </div>
                         </div>
 
                         {success && <Alert type="success">{success}</Alert>}
 
-                        {/* Encounters */}
                         <div className="sims-card" style={{ marginBottom:16 }}>
                             <div className="sims-card-header">
                                 <div className="sims-card-title">Clinical Encounters ({encounters.length})</div>
@@ -1654,60 +1514,18 @@
                                 </div>
                             }
                         </div>
-
-                        {/* Lab tests for patient */}
-                        {labTests.length > 0 && (
-                            <div className="sims-card">
-                                <div className="sims-card-header"><div className="sims-card-title">Lab Tests ({labTests.length})</div></div>
-                                <div style={{ overflowX:'auto' }}>
-                                    <table className="sims-table">
-                                        <thead><tr><th>Test</th><th>Category</th><th>Urgency</th><th>Status</th><th>Result</th><th>Ordered</th></tr></thead>
-                                        <tbody>
-                                            {labTests.map(t => (
-                                                <tr key={t._id}>
-                                                    <td style={{ fontWeight:600 }}>{t.testName}</td>
-                                                    <td><span className="badge badge-gray">{t.testCategory}</span></td>
-                                                    <td><StatusBadge status={t.urgency} /></td>
-                                                    <td><StatusBadge status={t.status} /></td>
-                                                    <td style={{ fontSize:12, color: t.result ? 'var(--sims-text)':'#aab4c8' }}>{t.result || 'Awaiting'}</td>
-                                                    <td style={{ fontSize:11.5, color:'var(--sims-text-muted)' }}>{fmt.datetime(t.orderedAt)}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )}
                     </>)}
                 </div>
 
-                {/* Encounter Modal */}
                 <Modal open={modal==='encounter'} onClose={()=>setModal(null)} title={`New Encounter — ${selectedPat?.firstName} ${selectedPat?.lastName}`} large
-                    footer={<>
-                        <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
-                        <button className="btn-primary" onClick={submitEncounter} disabled={submitting}>{submitting?'Saving...':'✓ Save Encounter'}</button>
-                    </>}>
+                    footer={<><button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button><button className="btn-primary" onClick={submitEncounter} disabled={submitting}>{submitting?'Saving...':'✓ Save Encounter'}</button></>}>
                     {err && <Alert type="error">{err}</Alert>}
                     <div className="divider-text">Clinical Information</div>
-                    <FormField label="Doctor Name" required>
-                        <input className="sims-input" value={form.doctorName||''} onChange={e=>f('doctorName',e.target.value)} placeholder="Doctor's full name"
-                            style={{ background: AuthService.getCurrentUser()?.role==='doctor' ? 'var(--sims-gray-light)':'' }}
-                            readOnly={AuthService.getCurrentUser()?.role==='doctor'} />
-                    </FormField>
-                    <FormField label="Specialization">
-                        <input className="sims-input" value={form.specialization||''} onChange={e=>f('specialization',e.target.value)} placeholder="e.g. Cardiology"
-                            style={{ background: AuthService.getCurrentUser()?.role==='doctor' ? 'var(--sims-gray-light)':'' }}
-                            readOnly={AuthService.getCurrentUser()?.role==='doctor'} />
-                    </FormField>
-                    <FormField label="Diagnosis / Chief Assessment" required>
-                        <textarea className="sims-input" rows={2} value={form.diagnosis||''} onChange={e=>f('diagnosis',e.target.value)} placeholder="Primary diagnosis" style={{ resize:'vertical' }} />
-                    </FormField>
-                    <FormField label="Clinical Notes">
-                        <textarea className="sims-input" rows={3} value={form.notes||''} onChange={e=>f('notes',e.target.value)} placeholder="History, examination findings, management plan..." style={{ resize:'vertical' }} />
-                    </FormField>
-                    <FormField label="Follow-up Date">
-                        <input className="sims-input" type="date" value={form.followUpDate||''} onChange={e=>f('followUpDate',e.target.value)} />
-                    </FormField>
+                    <FormField label="Doctor Name" required><input className="sims-input" value={form.doctorName||''} onChange={e=>f('doctorName',e.target.value)} placeholder="Doctor's full name" readOnly={AuthService.getCurrentUser()?.role==='doctor'} /></FormField>
+                    <FormField label="Specialization"><input className="sims-input" value={form.specialization||''} onChange={e=>f('specialization',e.target.value)} placeholder="e.g. Cardiology" readOnly={AuthService.getCurrentUser()?.role==='doctor'} /></FormField>
+                    <FormField label="Diagnosis / Chief Assessment" required><textarea className="sims-input" rows={2} value={form.diagnosis||''} onChange={e=>f('diagnosis',e.target.value)} placeholder="Primary diagnosis" style={{ resize:'vertical' }} /></FormField>
+                    <FormField label="Clinical Notes"><textarea className="sims-input" rows={3} value={form.notes||''} onChange={e=>f('notes',e.target.value)} placeholder="History, examination findings, management plan..." style={{ resize:'vertical' }} /></FormField>
+                    <FormField label="Follow-up Date"><input className="sims-input" type="date" value={form.followUpDate||''} onChange={e=>f('followUpDate',e.target.value)} /></FormField>
                     <div className="divider-text">Vitals</div>
                     <div className="grid-3">
                         <FormField label="Blood Pressure"><input className="sims-input" value={form.vitals?.bp||''} onChange={e=>fv('bp',e.target.value)} placeholder="120/80 mmHg" /></FormField>
@@ -1719,14 +1537,8 @@
                     </div>
                 </Modal>
 
-                {/* Lab Order Modal */}
                 <Modal open={modal==='lab'} onClose={()=>setModal(null)} title="Order Lab Tests" large
-                    footer={<>
-                        <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
-                        <button className="btn-primary" onClick={submitLab} disabled={submitting || labForm.tests.length===0}>
-                            {submitting ? 'Ordering...' : `Order ${labForm.tests.length} Test(s)`}
-                        </button>
-                    </>}>
+                    footer={<><button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button><button className="btn-primary" onClick={submitLab} disabled={submitting || labForm.tests.length===0}>{submitting ? 'Ordering...' : `Order ${labForm.tests.length} Test(s)`}</button></>}>
                     {err && <Alert type="error">{err}</Alert>}
                     <FormField label="Urgency">
                         <div style={{ display:'flex', gap:10 }}>
@@ -1755,16 +1567,9 @@
                     </div>
                 </Modal>
 
-                {/* Prescription Modal */}
                 <Modal open={modal==='prescription'} onClose={()=>setModal(null)} title="Write Prescription" large
-                    footer={<>
-                        <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
-                        <button className="btn-primary" onClick={submitRx} disabled={submitting||rxForm.medicines.length===0}>
-                            {submitting ? 'Saving...' : '✓ Save Prescription'}
-                        </button>
-                    </>}>
+                    footer={<><button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button><button className="btn-primary" onClick={submitRx} disabled={submitting||rxForm.medicines.length===0}>{submitting ? 'Saving...' : '✓ Save Prescription'}</button></>}>
                     {err && <Alert type="error">{err}</Alert>}
-                    {success && <Alert type="success">{success}</Alert>}
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
                         <div style={{ fontSize:13, color:'var(--sims-text-muted)' }}>Medicines ({rxForm.medicines.length})</div>
                         <button className="btn-outline btn-sm" onClick={addMedicine}>+ Add Medicine</button>
@@ -1777,38 +1582,24 @@
                                 <div className="grid-2" style={{ gap:8 }}>
                                     <FormField label="Medicine Name">
                                         <select className="sims-input" value={m.medicineName||''} onChange={e=>updateMed(i,'medicineName',e.target.value)}>
-                                            <option value="">-- Select or type --</option>
+                                            <option value="">-- Select --</option>
                                             {MEDICINES_LIST.map(med => <option key={med}>{med}</option>)}
                                         </select>
                                     </FormField>
                                     <FormField label="Dosage"><input className="sims-input" value={m.dosage||''} onChange={e=>updateMed(i,'dosage',e.target.value)} placeholder="e.g. 1 tablet" /></FormField>
                                     <FormField label="Frequency"><input className="sims-input" value={m.frequency||''} onChange={e=>updateMed(i,'frequency',e.target.value)} placeholder="e.g. Twice daily" /></FormField>
                                     <FormField label="Duration"><input className="sims-input" value={m.duration||''} onChange={e=>updateMed(i,'duration',e.target.value)} placeholder="e.g. 5 days" /></FormField>
-                                    <FormField label="Qty">
-                                        <input className="sims-input" type="number" value={m.quantity||1} onChange={e=>updateMed(i,'quantity',parseInt(e.target.value)||1)} min={1} />
-                                    </FormField>
-                                    <FormField label="Price (₹)">
-                                        <input className="sims-input" type="number" value={m.price||50} onChange={e=>updateMed(i,'price',parseFloat(e.target.value)||0)} />
-                                    </FormField>
+                                    <FormField label="Qty"><input className="sims-input" type="number" value={m.quantity||1} onChange={e=>updateMed(i,'quantity',parseInt(e.target.value)||1)} min={1} /></FormField>
+                                    <FormField label="Price (₹)"><input className="sims-input" type="number" value={m.price||50} onChange={e=>updateMed(i,'price',parseFloat(e.target.value)||0)} /></FormField>
                                 </div>
-                                <FormField label="Instructions">
-                                    <input className="sims-input" value={m.instructions||''} onChange={e=>updateMed(i,'instructions',e.target.value)} placeholder="e.g. After food, with water" />
-                                </FormField>
+                                <FormField label="Instructions"><input className="sims-input" value={m.instructions||''} onChange={e=>updateMed(i,'instructions',e.target.value)} placeholder="e.g. After food, with water" /></FormField>
                             </div>
                         ))
                     }
-                    {rxForm.medicines.length > 0 && (
-                        <div style={{ textAlign:'right', marginTop:4, fontSize:13, fontWeight:600, color:'var(--sims-navy)' }}>
-                            Estimated Total: {fmt.inr(rxForm.medicines.reduce((s,m)=>(m.price||0)*m.quantity+s,0))}
-                        </div>
-                    )}
                 </Modal>
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // LAB MODULE
-        // ═══════════════════════════════════════════════════
         function Laboratory() {
             const [tests, setTests] = useState([]);
             const [filter, setFilter] = useState('PENDING');
@@ -1824,8 +1615,7 @@
 
             const load = useCallback(() => {
                 setLoading(true);
-                API.getLabTests(filter !== 'ALL' ? `?status=${filter}` : '')
-                    .then(setTests).finally(() => setLoading(false));
+                API.getLabTests(filter !== 'ALL' ? `?status=${filter}` : '').then(setTests).finally(() => setLoading(false));
             }, [filter]);
 
             useEffect(() => { load(); }, [load]);
@@ -1836,13 +1626,10 @@
                 try {
                     await API.submitResult(selected.testId, { result, remarks });
                     setSuccess('Result submitted successfully');
-                    load();
-                    setModal(null);
+                    load(); setModal(null);
                 } catch(e) { setErr(e.message); }
                 setSubmitting(false);
             };
-
-            const urgencyBg = (u) => ({ STAT:'#fdeaec', URGENT:'#fff7ed', ROUTINE:'#f4f6fb' }[u] || '#f4f6fb');
 
             const filtered = tests.filter(t =>
                 `${t.testName} ${t.patientId} ${t.testId}`.toLowerCase().includes(search.toLowerCase())
@@ -1850,11 +1637,7 @@
 
             return <div className="fade-in">
                 <div className="page-header">
-                    <div>
-                        <div className="section-accent"></div>
-                        <div className="page-title">Laboratory</div>
-                        <div className="page-sub">Test queue and result entry</div>
-                    </div>
+                    <div><div className="section-accent"></div><div className="page-title">Laboratory</div><div className="page-sub">Test queue and result entry</div></div>
                     <button className="btn-outline" onClick={load}>↻ Refresh</button>
                 </div>
 
@@ -1874,30 +1657,25 @@
                     filtered.length === 0 ? <div className="sims-card"><EmptyState icon="🧪" title={`No ${filter.toLowerCase()} tests`} /></div> :
                     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                         {filtered.map(t => (
-                            <div key={t._id} className="sims-card" style={{ padding:'14px 18px', background: urgencyBg(t.urgency) }}>
+                            <div key={t._id} className="sims-card" style={{ padding:'14px 18px' }}>
                                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:8 }}>
                                     <div style={{ flex:1 }}>
                                         <div style={{ display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
                                             <span style={{ fontWeight:700, fontSize:14 }}>{t.testName}</span>
                                             <StatusBadge status={t.urgency} />
                                             <StatusBadge status={t.status} />
-                                            <span className="badge badge-gray">{t.testCategory}</span>
                                         </div>
                                         <div style={{ display:'flex', gap:16, marginTop:6, fontSize:12, color:'var(--sims-text-muted)' }}>
                                             <span><span className="patient-chip" style={{ fontSize:10 }}>{t.patientId}</span></span>
                                             {t.patientName && <span>👤 {t.patientName}</span>}
                                             <span>🕐 {fmt.datetime(t.orderedAt)}</span>
-                                            <span style={{ fontFamily:"'Outfit',sans-serif", fontSize:10.5, color:'#aab4c8' }}>{t.testId}</span>
                                         </div>
                                         {t.result && <div style={{ marginTop:6, background:'white', borderRadius:7, padding:'6px 10px', fontSize:12.5, border:'1px solid var(--sims-gray)' }}>
-                                            <strong>Result:</strong> {t.result}
-                                            {t.remarks && <> · <em>{t.remarks}</em></>}
+                                            <strong>Result:</strong> {t.result}{t.remarks && <> · <em>{t.remarks}</em></>}
                                         </div>}
                                     </div>
                                     {t.status !== 'COMPLETED' && (
-                                        <button className="btn-green btn-sm" onClick={()=>{ setSelected(t); setResult(''); setRemarks(''); setErr(''); setModal('result'); }}>
-                                            ✓ Enter Result
-                                        </button>
+                                        <button className="btn-green btn-sm" onClick={()=>{ setSelected(t); setResult(''); setRemarks(''); setErr(''); setModal('result'); }}>✓ Enter Result</button>
                                     )}
                                 </div>
                             </div>
@@ -1906,30 +1684,14 @@
                 )}
 
                 <Modal open={modal==='result'} onClose={()=>setModal(null)} title={`Enter Result — ${selected?.testName}`}
-                    footer={<>
-                        <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
-                        <button className="btn-green" onClick={submitResult} disabled={submitting}>{submitting?'Submitting...':'✓ Submit Result'}</button>
-                    </>}>
+                    footer={<><button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button><button className="btn-green" onClick={submitResult} disabled={submitting}>{submitting?'Submitting...':'✓ Submit Result'}</button></>}>
                     {err && <Alert type="error">{err}</Alert>}
-                    {success && <Alert type="success">{success}</Alert>}
-                    {selected && <div style={{ background:'var(--sims-gray-light)', borderRadius:10, padding:12, marginBottom:14, fontSize:12 }}>
-                        <div><strong>Test:</strong> {selected.testName}</div>
-                        <div><strong>Patient:</strong> {selected.patientId} — {selected.patientName}</div>
-                        <div><strong>Ordered:</strong> {fmt.datetime(selected.orderedAt)}</div>
-                    </div>}
-                    <FormField label="Result" required>
-                        <textarea className="sims-input" rows={3} value={result} onChange={e=>setResult(e.target.value)} placeholder="Enter test result, values, findings..." style={{ resize:'vertical' }} autoFocus />
-                    </FormField>
-                    <FormField label="Remarks / Interpretation">
-                        <input className="sims-input" value={remarks} onChange={e=>setRemarks(e.target.value)} placeholder="Normal / Abnormal / Further review required..." />
-                    </FormField>
+                    <FormField label="Result" required><textarea className="sims-input" rows={3} value={result} onChange={e=>setResult(e.target.value)} placeholder="Enter test result..." style={{ resize:'vertical' }} autoFocus /></FormField>
+                    <FormField label="Remarks"><input className="sims-input" value={remarks} onChange={e=>setRemarks(e.target.value)} placeholder="Normal / Abnormal..." /></FormField>
                 </Modal>
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // PHARMACY MODULE
-        // ═══════════════════════════════════════════════════
         function Pharmacy() {
             const [rxList, setRxList] = useState([]);
             const [filter, setFilter] = useState('PENDING');
@@ -1948,17 +1710,13 @@
 
             useEffect(() => { load(); }, [filter]);
 
-            const openIssue = (rx) => {
-                setSelected(rx);
-                setMeds(rx.medicines.map(m => ({ ...m })));
-                setErr(''); setModal('issue');
-            };
+            const openIssue = (rx) => { setSelected(rx); setMeds(rx.medicines.map(m => ({ ...m }))); setErr(''); setModal('issue'); };
 
             const issue = async () => {
                 setErr(''); setSubmitting(true);
                 try {
                     const res = await API.issueRx(selected.prescriptionId, meds);
-                    setSuccess(`Medicines dispensed! Bill generated: ${fmt.inr(res.bill.totalAmount)}`);
+                    setSuccess(`Medicines dispensed! Bill: ${fmt.inr(res.bill.totalAmount)}`);
                     load(); setModal(null);
                 } catch(e) { setErr(e.message); }
                 setSubmitting(false);
@@ -1966,11 +1724,7 @@
 
             return <div className="fade-in">
                 <div className="page-header">
-                    <div>
-                        <div className="section-accent"></div>
-                        <div className="page-title">Pharmacy</div>
-                        <div className="page-sub">Prescription dispensing & medicine inventory</div>
-                    </div>
+                    <div><div className="section-accent"></div><div className="page-title">Pharmacy</div><div className="page-sub">Prescription dispensing</div></div>
                     <button className="btn-outline" onClick={load}>↻ Refresh</button>
                 </div>
 
@@ -1987,26 +1741,23 @@
                             <div key={rx._id} className="sims-card" style={{ padding:'16px 18px' }}>
                                 <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:12 }}>
                                     <div style={{ flex:1 }}>
-                                        <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:6, flexWrap:'wrap' }}>
+                                        <div style={{ display:'flex', gap:8, alignItems:'center', marginBottom:6 }}>
                                             <span style={{ fontFamily:"'Outfit',sans-serif", fontSize:12, fontWeight:700, color:'var(--sims-navy)' }}>{rx.prescriptionId}</span>
                                             <StatusBadge status={rx.status} />
                                         </div>
                                         <div style={{ display:'flex', gap:16, fontSize:12, color:'var(--sims-text-muted)', marginBottom:8 }}>
                                             <span><span className="patient-chip" style={{ fontSize:10 }}>{rx.patientId}</span> {rx.patientName}</span>
                                             <span>Dr. {rx.doctorName}</span>
-                                            <span>{fmt.datetime(rx.createdAt)}</span>
                                         </div>
                                         <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
                                             {rx.medicines.map((m,i) => (
                                                 <span key={i} style={{ background:'var(--sims-gray-light)', borderRadius:7, padding:'4px 10px', fontSize:12, border:'1px solid var(--sims-gray)' }}>
-                                                    {m.medicineName} {m.dosage} × {m.quantity}
+                                                    {m.medicineName} × {m.quantity}
                                                 </span>
                                             ))}
                                         </div>
                                     </div>
-                                    {rx.status === 'PENDING' && (
-                                        <button className="btn-green btn-sm" onClick={()=>openIssue(rx)}>Dispense →</button>
-                                    )}
+                                    {rx.status === 'PENDING' && <button className="btn-green btn-sm" onClick={()=>openIssue(rx)}>Dispense →</button>}
                                 </div>
                             </div>
                         ))}
@@ -2014,30 +1765,19 @@
                 }
 
                 <Modal open={modal==='issue'} onClose={()=>setModal(null)} title="Dispense Medicines" large
-                    footer={<>
-                        <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
-                        <button className="btn-green" onClick={issue} disabled={submitting}>{submitting?'Dispensing...':'✓ Dispense & Generate Bill'}</button>
-                    </>}>
+                    footer={<><button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button><button className="btn-green" onClick={issue} disabled={submitting}>{submitting?'Dispensing...':'✓ Dispense & Bill'}</button></>}>
                     {err && <Alert type="error">{err}</Alert>}
                     {selected && <>
                         <div style={{ background:'var(--sims-gray-light)', borderRadius:10, padding:12, marginBottom:14, fontSize:12 }}>
                             <strong>{selected.patientName}</strong> · <span className="patient-chip" style={{ fontSize:10 }}>{selected.patientId}</span>
-                            <span style={{ marginLeft:8 }}>Rx: {selected.prescriptionId}</span>
-                        </div>
-                        <div style={{ marginBottom:10, display:'flex', justifyContent:'space-between' }}>
-                            <div className="sims-card-title">Medicines to Dispense</div>
                         </div>
                         {meds.map((m,i) => (
-                            <div key={i} style={{ background:'var(--sims-gray-light)', borderRadius:10, padding:'12px 14px', marginBottom:8, border:'1px solid var(--sims-gray)' }}>
+                            <div key={i} style={{ background:'var(--sims-gray-light)', borderRadius:10, padding:'12px 14px', marginBottom:8 }}>
                                 <div style={{ fontWeight:600, fontSize:14, marginBottom:8 }}>{m.medicineName}</div>
                                 <div className="grid-3" style={{ gap:8 }}>
                                     <FormField label="Dosage"><input className="sims-input" value={m.dosage||''} onChange={e=>{const n=[...meds];n[i].dosage=e.target.value;setMeds(n);}} /></FormField>
-                                    <FormField label="Quantity">
-                                        <input className="sims-input" type="number" value={m.quantity||1} onChange={e=>{const n=[...meds];n[i].quantity=parseInt(e.target.value)||1;setMeds(n);}} min={1} />
-                                    </FormField>
-                                    <FormField label="Price (₹)">
-                                        <input className="sims-input" type="number" value={m.price||50} onChange={e=>{const n=[...meds];n[i].price=parseFloat(e.target.value)||0;setMeds(n);}} />
-                                    </FormField>
+                                    <FormField label="Quantity"><input className="sims-input" type="number" value={m.quantity||1} onChange={e=>{const n=[...meds];n[i].quantity=parseInt(e.target.value)||1;setMeds(n);}} min={1} /></FormField>
+                                    <FormField label="Price (₹)"><input className="sims-input" type="number" value={m.price||50} onChange={e=>{const n=[...meds];n[i].price=parseFloat(e.target.value)||0;setMeds(n);}} /></FormField>
                                 </div>
                             </div>
                         ))}
@@ -2049,9 +1789,6 @@
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // BILLING MODULE
-        // ═══════════════════════════════════════════════════
         function Billing() {
             const [bills, setBills] = useState([]);
             const [loading, setLoading] = useState(true);
@@ -2065,11 +1802,7 @@
             const [success, setSuccess] = useState('');
             const [err, setErr] = useState('');
 
-            const load = () => {
-                setLoading(true);
-                API.getBills().then(setBills).finally(()=>setLoading(false));
-            };
-
+            const load = () => { setLoading(true); API.getBills().then(setBills).finally(()=>setLoading(false)); };
             useEffect(()=>{ load(); }, []);
 
             const filtered = bills.filter(b => {
@@ -2091,40 +1824,18 @@
                 setSubmitting(false);
             };
 
-            const typeColor = (t) => ({ REGISTRATION:'badge-navy', PHARMACY:'badge-green', LABORATORY:'badge-purple', RADIOLOGY:'badge-teal', PROCEDURE:'badge-orange', IPD:'badge-red' }[t] || 'badge-gray');
-
             return <div className="fade-in">
                 <div className="page-header">
-                    <div>
-                        <div className="section-accent"></div>
-                        <div className="page-title">Billing</div>
-                        <div className="page-sub">Payments, invoices & financial records</div>
-                    </div>
+                    <div><div className="section-accent"></div><div className="page-title">Billing</div><div className="page-sub">Payments, invoices & financial records</div></div>
                     <button className="btn-outline" onClick={load}>↻ Refresh</button>
                 </div>
 
                 {success && <Alert type="success">{success}</Alert>}
 
-                {/* Summary */}
                 <div className="grid-3" style={{ marginBottom:20 }}>
-                    <div className="stat-card navy">
-                        <div style={{ display:'flex', justifyContent:'space-between' }}>
-                            <div><div className="stat-number">{fmt.inr(totalRevenue)}</div><div className="stat-label">Revenue Collected</div></div>
-                            <div className="stat-icon" style={{ background:'#e8eef8', fontSize:22 }}>💰</div>
-                        </div>
-                    </div>
-                    <div className="stat-card red">
-                        <div style={{ display:'flex', justifyContent:'space-between' }}>
-                            <div><div className="stat-number">{fmt.inr(pendingRevenue)}</div><div className="stat-label">Outstanding</div></div>
-                            <div className="stat-icon" style={{ background:'#fdeaec', fontSize:22 }}>⏳</div>
-                        </div>
-                    </div>
-                    <div className="stat-card gold">
-                        <div style={{ display:'flex', justifyContent:'space-between' }}>
-                            <div><div className="stat-number">{bills.length}</div><div className="stat-label">Total Bills</div></div>
-                            <div className="stat-icon" style={{ background:'#fffbeb', fontSize:22 }}>🧾</div>
-                        </div>
-                    </div>
+                    <div className="stat-card navy"><div style={{ display:'flex', justifyContent:'space-between' }}><div><div className="stat-number">{fmt.inr(totalRevenue)}</div><div className="stat-label">Revenue Collected</div></div><div className="stat-icon" style={{ background:'#e8eef8', fontSize:22 }}>💰</div></div></div>
+                    <div className="stat-card red"><div style={{ display:'flex', justifyContent:'space-between' }}><div><div className="stat-number">{fmt.inr(pendingRevenue)}</div><div className="stat-label">Outstanding</div></div><div className="stat-icon" style={{ background:'#fdeaec', fontSize:22 }}>⏳</div></div></div>
+                    <div className="stat-card gold"><div style={{ display:'flex', justifyContent:'space-between' }}><div><div className="stat-number">{bills.length}</div><div className="stat-label">Total Bills</div></div><div className="stat-icon" style={{ background:'#fffbeb', fontSize:22 }}>🧾</div></div></div>
                 </div>
 
                 <div style={{ display:'flex', gap:12, marginBottom:16, flexWrap:'wrap' }}>
@@ -2139,36 +1850,21 @@
 
                 {loading ? <Spinner /> : (
                     <div className="sims-card">
-                        {filtered.length === 0
-                            ? <EmptyState icon="🧾" title="No bills found" />
-                            : <div style={{ overflowX:'auto' }}>
+                        {filtered.length === 0 ? <EmptyState icon="🧾" title="No bills found" /> :
+                            <div style={{ overflowX:'auto' }}>
                                 <table className="sims-table">
-                                    <thead><tr>
-                                        <th>Bill ID</th><th>Patient</th><th>Type</th>
-                                        <th>Items</th><th>Amount</th><th>Status</th>
-                                        <th>Mode</th><th>Date</th><th></th>
-                                    </tr></thead>
+                                    <thead><tr><th>Bill ID</th><th>Patient</th><th>Type</th><th>Amount</th><th>Status</th><th>Mode</th><th>Date</th><th></th></tr></thead>
                                     <tbody>
                                         {filtered.map(b => (
                                             <tr key={b._id}>
                                                 <td style={{ fontFamily:"'Outfit',sans-serif", fontSize:11, color:'var(--sims-navy)' }}>{b.billId}</td>
-                                                <td>
-                                                    <div style={{ fontWeight:600, fontSize:13 }}>{b.patientName || '—'}</div>
-                                                    <span className="patient-chip" style={{ fontSize:10 }}>{b.patientId}</span>
-                                                </td>
-                                                <td><span className={`badge ${typeColor(b.type)}`}>{b.type}</span></td>
-                                                <td style={{ fontSize:12, color:'var(--sims-text-muted)' }}>{b.items?.length || 0} item(s)</td>
-                                                <td style={{ fontFamily:"'Outfit',sans-serif", fontWeight:700, color:'var(--sims-navy-dark)' }}>{fmt.inr(b.netAmount||b.totalAmount)}</td>
+                                                <td><div style={{ fontWeight:600, fontSize:13 }}>{b.patientName || '—'}</div><span className="patient-chip" style={{ fontSize:10 }}>{b.patientId}</span></td>
+                                                <td><span className="badge badge-navy">{b.type}</span></td>
+                                                <td style={{ fontFamily:"'Outfit',sans-serif", fontWeight:700 }}>{fmt.inr(b.netAmount||b.totalAmount)}</td>
                                                 <td><StatusBadge status={b.paymentStatus} /></td>
                                                 <td style={{ fontSize:12 }}>{b.paymentMode || '—'}</td>
                                                 <td style={{ fontSize:11.5, color:'var(--sims-text-muted)' }}>{fmt.date(b.createdAt)}</td>
-                                                <td>
-                                                    {b.paymentStatus !== 'PAID' && (
-                                                        <button className="btn-green btn-sm" onClick={()=>{ setSelected(b); setPayMode('CASH'); setDiscount(0); setErr(''); setModal('pay'); }}>
-                                                            Pay
-                                                        </button>
-                                                    )}
-                                                </td>
+                                                <td>{b.paymentStatus !== 'PAID' && <button className="btn-green btn-sm" onClick={()=>{ setSelected(b); setPayMode('CASH'); setDiscount(0); setErr(''); setModal('pay'); }}>Pay</button>}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -2179,39 +1875,14 @@
                 )}
 
                 <Modal open={modal==='pay'} onClose={()=>setModal(null)} title="Process Payment"
-                    footer={<>
-                        <button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button>
-                        <button className="btn-green" onClick={pay} disabled={submitting}>{submitting?'Processing...':'✓ Confirm Payment'}</button>
-                    </>}>
+                    footer={<><button className="btn-outline" onClick={()=>setModal(null)}>Cancel</button><button className="btn-green" onClick={pay} disabled={submitting}>{submitting?'Processing...':'✓ Confirm Payment'}</button></>}>
                     {err && <Alert type="error">{err}</Alert>}
                     {selected && <>
                         <div style={{ background:'var(--sims-gray-light)', borderRadius:12, padding:14, marginBottom:14 }}>
-                            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
-                                <span style={{ fontSize:12, color:'var(--sims-text-muted)' }}>Bill ID</span>
-                                <strong style={{ fontSize:12, fontFamily:"'Outfit',sans-serif" }}>{selected.billId}</strong>
-                            </div>
-                            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
-                                <span style={{ fontSize:12, color:'var(--sims-text-muted)' }}>Patient</span>
-                                <strong style={{ fontSize:13 }}>{selected.patientName} ({selected.patientId})</strong>
-                            </div>
-                            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
-                                <span style={{ fontSize:12, color:'var(--sims-text-muted)' }}>Bill Type</span>
-                                <span className={`badge ${({REGISTRATION:'badge-navy',PHARMACY:'badge-green'}[selected.type]||'badge-gray')}`}>{selected.type}</span>
-                            </div>
-                            {selected.items?.map((item,i) => (
-                                <div key={i} style={{ display:'flex', justifyContent:'space-between', fontSize:12.5, marginBottom:4 }}>
-                                    <span>{item.name} × {item.quantity}</span>
-                                    <span style={{ fontFamily:"'Outfit',sans-serif" }}>{fmt.inr(item.total)}</span>
-                                </div>
-                            ))}
-                            <div style={{ borderTop:'2px solid var(--sims-gray)', paddingTop:8, display:'flex', justifyContent:'space-between', marginTop:6 }}>
-                                <span style={{ fontWeight:700 }}>Total</span>
-                                <span style={{ fontFamily:"'Outfit',sans-serif", fontSize:18, fontWeight:800, color:'var(--sims-navy-dark)' }}>{fmt.inr(selected.totalAmount)}</span>
-                            </div>
+                            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}><span style={{ fontSize:12, color:'var(--sims-text-muted)' }}>Patient</span><strong>{selected.patientName} ({selected.patientId})</strong></div>
+                            <div style={{ display:'flex', justifyContent:'space-between', borderTop:'2px solid var(--sims-gray)', paddingTop:8, marginTop:6 }}><span style={{ fontWeight:700 }}>Total</span><span style={{ fontFamily:"'Outfit',sans-serif", fontSize:18, fontWeight:800, color:'var(--sims-navy-dark)' }}>{fmt.inr(selected.totalAmount)}</span></div>
                         </div>
-                        <FormField label="Discount (₹)">
-                            <input className="sims-input" type="number" value={discount} onChange={e=>setDiscount(e.target.value)} min={0} max={selected.totalAmount} />
-                        </FormField>
+                        <FormField label="Discount (₹)"><input className="sims-input" type="number" value={discount} onChange={e=>setDiscount(e.target.value)} min={0} /></FormField>
                         <FormField label="Payment Mode">
                             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
                                 {['CASH','CARD','UPI','INSURANCE'].map(m => (
@@ -2229,9 +1900,6 @@
             </div>;
         }
 
-        // ═══════════════════════════════════════════════════
-        // MAIN APP
-        // ═══════════════════════════════════════════════════
         function App() {
             const [user, setUser] = useState(null);
             const [module, setModule] = useState(null);
@@ -2247,36 +1915,26 @@
 
             useEffect(()=>{
                 const refresh = () => {
-                    Promise.all([
-                        API.getLabTests('?status=PENDING'),
-                        API.getRx('?status=PENDING')
-                    ]).then(([labs, rx]) => setBadges({ lab: labs.length, pharmacy: rx.length })).catch(()=>{});
+                    Promise.all([API.getLabTests('?status=PENDING'), API.getRx('?status=PENDING')])
+                        .then(([labs, rx]) => setBadges({ lab: labs.length, pharmacy: rx.length })).catch(()=>{});
                 };
                 refresh();
                 const id = setInterval(refresh, 90000);
                 return () => clearInterval(id);
             }, []);
 
-            const handleLogin = (u) => {
-                setUser(u);
-                setModule(u.role === 'admin' ? 'dashboard' : u.role);
-            };
-
-            const handleLogout = () => {
-                AuthService.logout();
-                setUser(null);
-                setModule(null);
-            };
+            const handleLogin = (u) => { setUser(u); setModule(u.role === 'admin' ? 'dashboard' : u.role); };
+            const handleLogout = () => { AuthService.logout(); setUser(null); setModule(null); };
 
             if (!user) return <LoginPage onLogin={handleLogin} />;
 
             const moduleMap = {
                 dashboard: { title:'Admin Dashboard', sub:'SIMS Hospital Overview', comp:<Dashboard /> },
-                reception: { title:'Reception',         sub:'Patient Registration & Doctor Management', comp:<Reception /> },
-                doctor:    { title:'Doctor Portal',     sub:'Encounters, Lab Orders & Prescriptions', comp:<DoctorPortal /> },
-                lab:       { title:'Laboratory',        sub:'Test Queue & Result Entry', comp:<Laboratory /> },
-                pharmacy:  { title:'Pharmacy',          sub:'Prescription Dispensing', comp:<Pharmacy /> },
-                billing:   { title:'Billing Department',sub:'Payments & Financial Records', comp:<Billing /> },
+                reception: { title:'Reception', sub:'Patient Registration & Doctor Management', comp:<Reception /> },
+                doctor:    { title:'Doctor Portal', sub:'Encounters, Lab Orders & Prescriptions', comp:<DoctorPortal /> },
+                lab:       { title:'Laboratory', sub:'Test Queue & Result Entry', comp:<Laboratory /> },
+                pharmacy:  { title:'Pharmacy', sub:'Prescription Dispensing', comp:<Pharmacy /> },
+                billing:   { title:'Billing Department', sub:'Payments & Financial Records', comp:<Billing /> },
             };
 
             const current = moduleMap[module] || moduleMap.reception;
@@ -2285,9 +1943,7 @@
                 <Sidebar active={module} onNav={setModule} user={user} onLogout={handleLogout} badges={badges} />
                 <div className="sims-main">
                     <TopBar title={current.title} subtitle={current.sub} user={user} />
-                    <div className="sims-content">
-                        {current.comp}
-                    </div>
+                    <div className="sims-content">{current.comp}</div>
                 </div>
             </div>;
         }
