@@ -1,561 +1,1952 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const bcrypt = require('bcryptjs');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIMS Hospital — HMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --navy: #0b1f3a;
+      --blue: #1a56db;
+      --blue-mid: #2563eb;
+      --blue-light: #3b82f6;
+      --cyan: #0ea5e9;
+      --teal: #0d9488;
+      --surface: #f0f4f8;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --success: #059669;
+      --danger: #dc2626;
+      --warn: #d97706;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--surface); color: var(--text); -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+    /* ── LOGIN ── */
+    .login-page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 460px;
+      background: var(--navy);
+    }
+    @media (max-width: 768px) { .login-page { grid-template-columns: 1fr; } .login-visual { display: none !important; } }
+    .login-visual {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, #071527 0%, #0d2545 40%, #0f3460 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 4rem;
+    }
+    .login-visual::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(30,86,219,0.18) 0%, transparent 70%);
+      top: -150px; right: -200px;
+    }
+    .login-visual::after {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%);
+      bottom: -100px; left: -80px;
+    }
+    /* Animated ECG line */
+    .ecg-line {
+      position: absolute;
+      bottom: 80px;
+      left: 0; right: 0;
+      height: 60px;
+      opacity: 0.15;
+    }
+    .ecg-line svg { width: 100%; }
+    @keyframes ecgScroll { from { stroke-dashoffset: 800; } to { stroke-dashoffset: 0; } }
+    .ecg-path { stroke: #0ea5e9; stroke-width: 2; fill: none; stroke-dasharray: 800; animation: ecgScroll 4s linear infinite; }
 
-// ─── LESSON 1: CORS preflight fix — handles OPTIONS before anything else ──────
-// Without this, GitHub Pages → Render gives ERR_CONNECTION_CLOSED
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-  next();
-});
-app.use(cors());
-app.use(express.json());
+    .login-form-panel {
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem 2.5rem;
+      min-height: 100vh;
+    }
+    .login-cross {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, #1a56db, #0ea5e9);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 24px rgba(30,86,219,0.35);
+      flex-shrink: 0;
+    }
+    .form-field { margin-bottom: 1.1rem; }
+    .form-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: #f8fafc;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--blue-light); background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+    .form-input::placeholder { color: #cbd5e1; }
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #1a56db, #2563eb);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.4); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .role-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .role-pill:hover { background: #dbeafe; border-color: #93c5fd; color: var(--blue); }
 
-// ─── MongoDB Connection ────────────────────────────────────────────────────────
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ Connected to MongoDB Atlas'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+    /* ── HEADER ── */
+    .hms-header {
+      background: var(--navy);
+      padding: 0 1.75rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .header-logo { display: flex; align-items: center; gap: 11px; }
+    .header-cross {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #1a56db, #0ea5e9);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .header-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: white;
+      letter-spacing: 0.01em;
+    }
+    .header-sub { font-size: 0.58rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 1px; }
+    .header-badge {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-size: 0.58rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-left: 6px;
+    }
+    .user-chip {
+      display: flex; align-items: center; gap: 9px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 99px;
+      padding: 5px 12px 5px 5px;
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: white;
+    }
+    .user-name { font-size: 0.8rem; font-weight: 600; color: white; }
+    .user-role { font-size: 0.65rem; color: rgba(255,255,255,0.45); }
+    .btn-logout {
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5;
+      border-radius: 7px;
+      padding: 5px 13px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.25); color: white; }
 
-// ─── SCHEMAS ──────────────────────────────────────────────────────────────────
+    /* ── NAV ── */
+    .hms-nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.75rem;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .nav-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 13px 18px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+      font-family: 'Inter', sans-serif;
+    }
+    .nav-btn:hover:not(:disabled) { color: var(--blue); background: #eff6ff; }
+    .nav-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 700; }
+    .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-const doctorSchema = new mongoose.Schema({
-  doctorId: { type: String, required: true, unique: true },
-  name: { type: String, required: true, trim: true },
-  specialization: { type: String, required: true, trim: true },
-  phone: { type: String, default: '' },
-  email: { type: String, default: '' },
-  qualification: { type: String, default: '' },
-  passwordHash: { type: String, required: true },
-  registeredAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+    /* ── MAIN ── */
+    .hms-main { padding: 1.75rem 2rem; max-width: 1400px; margin: 0 auto; }
+    .page-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.65rem;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+    }
 
-// Staff accounts schema (reception, lab, pharmacy, billing, admin)
-const staffSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true, trim: true },
-  passwordHash: { type: String, required: true },
-  role: { type: String, required: true, enum: ['reception', 'lab', 'pharmacy', 'billing', 'admin'] },
-  name: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+    /* ── CARDS ── */
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.4rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .card-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 1.1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid var(--border);
+    }
 
-const patientSchema = new mongoose.Schema({
-  patientId: { type: String, required: true, unique: true },
-  firstName: { type: String, required: true, trim: true },
-  lastName: { type: String, default: '', trim: true },
-  age: { type: Number, required: true, min: 0, max: 150 },
-  gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
-  phone: { type: String, default: '' },
-  address: { type: String, default: '' },
-  chiefComplaint: { type: String, required: true },
-  assignedDoctorId: { type: String, default: '' },
-  registeredAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 99px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    .badge-orange { background: #fef3c7; color: #92400e; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .badge-purple { background: #ede9fe; color: #5b21b6; }
+    .badge-teal { background: #ccfbf1; color: #0f766e; }
 
-const encounterSchema = new mongoose.Schema({
-  encounterId: { type: String, required: true, unique: true },
-  patientId: { type: String, required: true, index: true },
-  doctorName: { type: String, required: true },
-  diagnosis: { type: String, required: true },
-  notes: { type: String, default: '' },
-  createdAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+    /* ── ALERT ── */
+    .alert { padding: 12px 16px; border-radius: 10px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem; }
+    .alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+    .alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
+    .alert-warn { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
 
-const labTestSchema = new mongoose.Schema({
-  testId: { type: String, required: true, unique: true },
-  encounterId: { type: String, required: true, index: true },
-  patientId: { type: String, required: true },
-  testName: { type: String, required: true },
-  status: { type: String, enum: ['PENDING', 'COMPLETED'], default: 'PENDING', index: true },
-  result: { type: String, default: null },
-  orderedAt: { type: Date, default: Date.now },
-  completedAt: { type: Date, default: null }
-}, { timestamps: true });
+    /* ── INPUTS ── */
+    .inp {
+      width: 100%;
+      padding: 9px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: 0.85rem;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: #fafbfc;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .inp:focus { border-color: var(--blue-light); background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .lbl { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 5px; }
 
-const prescriptionSchema = new mongoose.Schema({
-  prescriptionId: { type: String, required: true, unique: true },
-  encounterId: { type: String, required: true, index: true },
-  patientId: { type: String, required: true },
-  medicines: [{
-    medicineName: String,
-    dosage: String,
-    duration: String,
-    quantity: { type: Number, default: 1 },
-    price: { type: Number, default: 50 }
-  }],
-  status: { type: String, enum: ['PENDING', 'ISSUED'], default: 'PENDING' },
-  issuedAt: { type: Date, default: null },
-  createdAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+    /* ── BUTTONS ── */
+    .btn { padding: 9px 18px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.18s; font-family: 'Inter', sans-serif; }
+    .btn-blue { background: var(--blue); color: white; }
+    .btn-blue:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-green { background: var(--success); color: white; }
+    .btn-green:hover:not(:disabled) { background: #047857; }
+    .btn-red { background: var(--danger); color: white; }
+    .btn-red:hover:not(:disabled) { background: #b91c1c; }
+    .btn-ghost { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-ghost:hover { background: #e2e8f0; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-const billSchema = new mongoose.Schema({
-  billId: { type: String, required: true, unique: true },
-  patientId: { type: String, required: true, index: true },
-  prescriptionId: { type: String, default: null },
-  type: { type: String, enum: ['REGISTRATION', 'PHARMACY'], required: true },
-  items: [{
-    name: String,
-    quantity: Number,
-    price: Number,
-    total: Number
-  }],
-  totalAmount: { type: Number, required: true },
-  createdAt: { type: Date, default: Date.now }
-}, { timestamps: true });
+    /* ── PATIENT CARD ── */
+    .patient-row {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 1rem 1.2rem;
+      background: white;
+      margin-bottom: 8px;
+      transition: all 0.18s;
+      cursor: pointer;
+    }
+    .patient-row:hover { border-color: #93c5fd; box-shadow: 0 2px 10px rgba(59,130,246,0.1); }
 
-const activityLogSchema = new mongoose.Schema({
-  action: { type: String, required: true },
-  description: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now }
-}, { timestamps: true });
+    /* ── STAT CARDS ── */
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .stat-icon { width: 46px; height: 46px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .stat-value { font-size: 1.7rem; font-weight: 800; color: var(--navy); line-height: 1; }
+    .stat-label { font-size: 0.74rem; color: var(--muted); font-weight: 500; margin-top: 3px; }
 
-const Doctor = mongoose.model('Doctor', doctorSchema);
-const Staff = mongoose.model('Staff', staffSchema);
-const Patient = mongoose.model('Patient', patientSchema);
-const Encounter = mongoose.model('Encounter', encounterSchema);
-const LabTest = mongoose.model('LabTest', labTestSchema);
-const Prescription = mongoose.model('Prescription', prescriptionSchema);
-const Bill = mongoose.model('Bill', billSchema);
-const ActivityLog = mongoose.model('ActivityLog', activityLogSchema);
+    /* ── AI CHATBOT FLOATING ── */
+    .chat-fab {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 1000;
+    }
+    .chat-btn {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, #1a56db, #0ea5e9);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 24px rgba(30,86,219,0.45);
+      transition: all 0.2s;
+      position: relative;
+    }
+    .chat-btn:hover { transform: scale(1.08); box-shadow: 0 8px 32px rgba(30,86,219,0.55); }
+    .chat-btn-pulse {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(30,86,219,0.3);
+      animation: pulse 2s ease-out infinite;
+    }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+    .chat-window {
+      position: absolute;
+      bottom: 70px;
+      right: 0;
+      width: 360px;
+      max-height: 520px;
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.25s ease;
+    }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .chat-header {
+      background: linear-gradient(135deg, #0b1f3a, #1a3a6c);
+      padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .chat-avatar { width: 36px; height: 36px; background: linear-gradient(135deg,#1a56db,#0ea5e9); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 10px; max-height: 340px; }
+    .msg-ai { background: #f1f5f9; border-radius: 12px 12px 12px 2px; padding: 10px 14px; font-size: 0.83rem; line-height: 1.5; color: var(--text); max-width: 90%; }
+    .msg-user { background: #1a56db; color: white; border-radius: 12px 12px 2px 12px; padding: 10px 14px; font-size: 0.83rem; line-height: 1.5; max-width: 90%; align-self: flex-end; }
+    .chat-input-row { padding: 0.75rem 1rem; border-top: 1px solid #f1f5f9; display: flex; gap: 8px; }
+    .chat-input { flex: 1; padding: 9px 13px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 0.83rem; font-family: 'Inter', sans-serif; outline: none; }
+    .chat-input:focus { border-color: var(--blue-light); }
+    .chat-send { width: 36px; height: 36px; background: var(--blue); border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .chat-send:hover { background: #1d4ed8; }
 
-// ─── HELPER ───────────────────────────────────────────────────────────────────
-async function logActivity(action, description) {
-  try {
-    await ActivityLog.create({ action, description });
-  } catch (e) {
-    console.error('Activity log error:', e.message);
+    /* ── TABS ── */
+    .tab-bar { display: flex; gap: 3px; background: #f1f5f9; border-radius: 10px; padding: 3px; margin-bottom: 1.4rem; }
+    .tab-btn { flex: 1; padding: 7px 14px; border-radius: 8px; border: none; background: none; font-size: 0.82rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.18s; font-family: 'Inter', sans-serif; white-space: nowrap; }
+    .tab-btn.active { background: white; color: var(--blue); font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+    /* ── FOOTER ── */
+    .hms-footer {
+      background: var(--navy);
+      padding: 0.7rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; max-width: 1400px; margin: 0 auto; }
+    .footer-left { font-size: 0.72rem; color: rgba(255,255,255,0.4); }
+    .footer-left strong { color: rgba(255,255,255,0.7); }
+    .footer-contacts { display: flex; gap: 18px; }
+    .footer-contact { font-size: 0.68rem; color: rgba(255,255,255,0.3); }
+    .footer-contact span { color: rgba(255,255,255,0.55); }
+
+    /* ── OPERATION CARD ── */
+    .op-card { border: 1px solid var(--border); border-radius: 11px; padding: 1rem 1.2rem; background: white; margin-bottom: 8px; }
+    .op-card.scheduled { border-left: 3px solid #3b82f6; }
+    .op-card.completed { border-left: 3px solid var(--success); }
+    .op-card.cancelled { border-left: 3px solid var(--danger); opacity: 0.7; }
+
+    /* ── ACCESS DENIED ── */
+    .access-denied { text-align: center; padding: 3rem; }
+
+    /* Loading */
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeIn 0.3s ease; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ── API URL ──────────────────────────────────────────────────────────────────
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3000/api'
+  : 'https://sims-hms.onrender.com/api';
+
+// Ping to wake Render
+async function pingServer() {
+  try { await fetch(`${API_URL}/health`, { cache: 'no-store' }); } catch (e) {}
+}
+pingServer();
+setInterval(pingServer, 10 * 60 * 1000);
+
+// ── AUTH ─────────────────────────────────────────────────────────────────────
+class AuthService {
+  static currentUser = null;
+
+  static async login(username, password) {
+    const u = username.trim(), p = password.trim();
+    for (const endpoint of ['/auth/staff-login', '/auth/doctor-login']) {
+      try {
+        const res = await fetch(`${API_URL}${endpoint}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          this.currentUser = data.user;
+          sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+          return { success: true, user: this.currentUser };
+        }
+      } catch (e) {}
+    }
+    return { success: false, error: 'Invalid credentials. Please try again.' };
+  }
+
+  static logout() { this.currentUser = null; sessionStorage.removeItem('currentUser'); }
+
+  static isAuthenticated() {
+    if (this.currentUser) return true;
+    const s = sessionStorage.getItem('currentUser');
+    if (s) { try { this.currentUser = JSON.parse(s); return true; } catch (e) {} }
+    return false;
+  }
+
+  static getCurrentUser() {
+    if (!this.currentUser) {
+      const s = sessionStorage.getItem('currentUser');
+      if (s) { try { this.currentUser = JSON.parse(s); } catch (e) { this.currentUser = null; } }
+    }
+    return this.currentUser;
   }
 }
 
-// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'HMS Backend is running',
-    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    timestamp: new Date().toISOString()
-  });
-});
-
-// ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
-
-// Staff login (reception, lab, pharmacy, billing, admin)
-app.post('/api/auth/staff-login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
-    const staff = await Staff.findOne({ username: username.trim() });
-    if (!staff) return res.status(401).json({ error: 'Invalid username or password' });
-    const match = await bcrypt.compare(password.trim(), staff.passwordHash);
-    if (!match) return res.status(401).json({ error: 'Invalid username or password' });
-    res.json({ success: true, user: { username: staff.username, role: staff.role, name: staff.name } });
-  } catch (e) {
-    res.status(500).json({ error: 'Login failed', details: e.message });
+// ── SERVICES ─────────────────────────────────────────────────────────────────
+class DoctorManagementService {
+  static async registerDoctor(d) {
+    const res = await fetch(`${API_URL}/doctors`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to register doctor'); }
+    return res.json();
   }
-});
-
-// Doctor login
-app.post('/api/auth/doctor-login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
-    const doctor = await Doctor.findOne({ doctorId: username.trim() });
-    if (!doctor) return res.status(401).json({ error: 'Invalid doctor ID or password' });
-    const match = await bcrypt.compare(password.trim(), doctor.passwordHash);
-    if (!match) return res.status(401).json({ error: 'Invalid doctor ID or password' });
-    res.json({ success: true, user: { username: doctor.doctorId, role: 'doctor', name: doctor.name, specialization: doctor.specialization } });
-  } catch (e) {
-    res.status(500).json({ error: 'Login failed', details: e.message });
+  static async getAllDoctors() {
+    const res = await fetch(`${API_URL}/doctors`, { cache:'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch doctors');
+    return res.json();
   }
-});
+  static async updateDoctor(doctorId, data) {
+    const res = await fetch(`${API_URL}/doctors/${doctorId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    if (!res.ok) throw new Error('Failed to update doctor');
+    return res.json();
+  }
+}
 
-// Setup initial staff accounts (run once — admin protected by env secret)
-app.post('/api/auth/setup-staff', async (req, res) => {
-  try {
-    const { setupSecret, accounts } = req.body;
-    if (setupSecret !== process.env.SETUP_SECRET) return res.status(403).json({ error: 'Forbidden' });
-    const results = [];
-    for (const acc of accounts) {
-      const passwordHash = await bcrypt.hash(acc.password, 10);
-      const existing = await Staff.findOne({ username: acc.username });
-      if (existing) {
-        existing.passwordHash = passwordHash;
-        existing.name = acc.name;
-        existing.role = acc.role;
-        await existing.save();
-        results.push({ username: acc.username, action: 'updated' });
-      } else {
-        await Staff.create({ username: acc.username, passwordHash, role: acc.role, name: acc.name });
-        results.push({ username: acc.username, action: 'created' });
-      }
+class PatientService {
+  static async registerPatient(d) {
+    const res = await fetch(`${API_URL}/patients`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to register patient'); }
+    return res.json();
+  }
+  static async getAllPatients() {
+    const res = await fetch(`${API_URL}/patients`, { cache:'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch patients');
+    return res.json();
+  }
+  static async getPatient(id) {
+    const res = await fetch(`${API_URL}/patients/${id}`, { cache:'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+  }
+  // Filter patients by assigned doctor — enforced in UI too
+  static async getPatientsByDoctor(doctorId) {
+    const all = await this.getAllPatients();
+    return all.filter(p => p.assignedDoctorId === doctorId);
+  }
+}
+
+class DoctorService {
+  static async createEncounter(d) {
+    const res = await fetch(`${API_URL}/encounters`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to create encounter'); }
+    return res.json();
+  }
+  static async orderLabTests(encounterId, patientId, tests) {
+    const res = await fetch(`${API_URL}/labtests/bulk`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ encounterId, patientId, tests }) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to order lab tests'); }
+    return res.json();
+  }
+  static async createPrescription(d) {
+    const res = await fetch(`${API_URL}/prescriptions`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(d) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'Failed to create prescription'); }
+    return res.json();
+  }
+  static async getEncountersByPatient(id) {
+    const res = await fetch(`${API_URL}/encounters/patient/${id}`, { cache:'no-store' });
+    if (!res.ok) return [];
+    return res.json();
+  }
+  static async getLabTestsByEncounter(id) {
+    const res = await fetch(`${API_URL}/labtests/encounter/${id}`, { cache:'no-store' });
+    if (!res.ok) return [];
+    return res.json();
+  }
+}
+
+class LabService {
+  static async getPendingTests() {
+    const res = await fetch(`${API_URL}/labtests?status=PENDING`, { cache:'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch tests');
+    return res.json();
+  }
+  static async getAllTests() {
+    const res = await fetch(`${API_URL}/labtests`, { cache:'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch tests');
+    return res.json();
+  }
+  static async updateTestResult(id, result) {
+    const res = await fetch(`${API_URL}/labtests/${id}/result`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ result }) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+    return res.json();
+  }
+}
+
+class PharmacyService {
+  static async getPendingPrescriptions() {
+    const res = await fetch(`${API_URL}/prescriptions?status=PENDING`, { cache:'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch prescriptions');
+    return res.json();
+  }
+  static async issueMedicines(id, medicines) {
+    const res = await fetch(`${API_URL}/prescriptions/${id}/issue`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ medicines }) });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+    return res.json();
+  }
+}
+
+class BillingService {
+  static async getBillsByPatient(id) {
+    const res = await fetch(`${API_URL}/bills/patient/${id}`, { cache:'no-store' });
+    if (!res.ok) return [];
+    return res.json();
+  }
+  static async getAllBills() {
+    const res = await fetch(`${API_URL}/bills`, { cache:'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch bills');
+    return res.json();
+  }
+}
+
+class AdminService {
+  static async getDashboardStats() {
+    const res = await fetch(`${API_URL}/stats`, { cache:'no-store' });
+    if (!res.ok) throw new Error('Failed to fetch stats');
+    return res.json();
+  }
+}
+
+// ── OPERATION SERVICE (localStorage for scheduling since no backend endpoint) ─
+class OperationService {
+  static getAll() {
+    try { return JSON.parse(localStorage.getItem('sims_operations') || '[]'); } catch { return []; }
+  }
+  static save(ops) {
+    localStorage.setItem('sims_operations', JSON.stringify(ops));
+  }
+  static schedule(op) {
+    const ops = this.getAll();
+    const newOp = { ...op, id: `OP-${Date.now()}`, status: 'scheduled', createdAt: new Date().toISOString() };
+    ops.unshift(newOp);
+    this.save(ops);
+    return newOp;
+  }
+  static cancel(id, reason) {
+    const ops = this.getAll();
+    const idx = ops.findIndex(o => o.id === id);
+    if (idx >= 0) { ops[idx].status = 'cancelled'; ops[idx].cancelReason = reason; ops[idx].cancelledAt = new Date().toISOString(); }
+    this.save(ops);
+    return ops[idx];
+  }
+  static complete(id) {
+    const ops = this.getAll();
+    const idx = ops.findIndex(o => o.id === id);
+    if (idx >= 0) { ops[idx].status = 'completed'; ops[idx].completedAt = new Date().toISOString(); }
+    this.save(ops);
+  }
+  static getByDoctor(doctorId) {
+    return this.getAll().filter(o => o.doctorId === doctorId);
+  }
+}
+
+// ── CROSS LOGO SVG ────────────────────────────────────────────────────────────
+function CrossSVG({ size = 20 }) {
+  const s = size;
+  const arm = Math.round(s * 0.3);
+  return (
+    <svg width={s} height={s} viewBox="0 0 40 40" fill="none">
+      <rect x="14" y="2" width="12" height="36" rx="3.5" fill="white"/>
+      <rect x="2" y="14" width="36" height="12" rx="3.5" fill="white"/>
+    </svg>
+  );
+}
+
+// ── AI CHATBOT ────────────────────────────────────────────────────────────────
+function AIChatbot({ currentUser }) {
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: 'ai', text: `Hello${currentUser ? ` Dr. ${currentUser.name}` : ''}! I'm SIMS AI Assistant. I can help with clinical guidance, drug interactions, patient management tips, and hospital protocols. How can I assist you today?` }
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const send = async () => {
+    const q = input.trim();
+    if (!q || loading) return;
+    setInput('');
+    setMessages(m => [...m, { role: 'user', text: q }]);
+    setLoading(true);
+
+    const sysPrompt = `You are SIMS AI, a medical assistant at SIMS Hospital, Vadapalani Chennai (SRM Group). You assist doctors and clinical staff with: clinical decision support, drug interactions, dosage guidance, hospital workflows, ICD codes, lab result interpretation, medical terminology. Always be concise, professional, and safe. Remind users to verify critical decisions with senior staff. Do not diagnose patients directly.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 600,
+          system: sysPrompt,
+          messages: [
+            ...messages.filter(m => m.role !== 'ai').map(m => ({ role: 'user', content: m.text })),
+            { role: 'user', content: q }
+          ]
+        })
+      });
+      const data = await response.json();
+      const text = data.content?.[0]?.text || 'Sorry, I could not process that. Please try again.';
+      setMessages(m => [...m, { role: 'ai', text }]);
+    } catch (e) {
+      setMessages(m => [...m, { role: 'ai', text: 'Connection issue. Please check your network and try again.' }]);
+    } finally {
+      setLoading(false);
     }
-    res.json({ success: true, results });
-  } catch (e) {
-    res.status(500).json({ error: 'Setup failed', details: e.message });
-  }
-});
+  };
 
-// Change staff password
-app.post('/api/auth/change-password', async (req, res) => {
-  try {
-    const { username, oldPassword, newPassword } = req.body;
-    const staff = await Staff.findOne({ username });
-    if (!staff) return res.status(404).json({ error: 'User not found' });
-    const match = await bcrypt.compare(oldPassword, staff.passwordHash);
-    if (!match) return res.status(401).json({ error: 'Current password incorrect' });
-    staff.passwordHash = await bcrypt.hash(newPassword, 10);
-    await staff.save();
-    res.json({ success: true, message: 'Password changed successfully' });
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to change password', details: e.message });
-  }
-});
+  return (
+    <div className="chat-fab">
+      {open && (
+        <div className="chat-window">
+          <div className="chat-header">
+            <div className="chat-avatar">🤖</div>
+            <div>
+              <div style={{ color: 'white', fontSize: '0.88rem', fontWeight: 700 }}>SIMS AI Assistant</div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.68rem' }}>Clinical support · Available 24/7</div>
+            </div>
+            <button onClick={() => setOpen(false)} style={{ marginLeft:'auto', background:'none', border:'none', color:'rgba(255,255,255,0.5)', cursor:'pointer', fontSize:'18px' }}>×</button>
+          </div>
+          <div className="chat-messages">
+            {messages.map((m, i) => (
+              <div key={i} className={m.role === 'ai' ? 'msg-ai' : 'msg-user'}>
+                {m.role === 'ai' && <div style={{ fontSize:'0.68rem', fontWeight:700, color:'#3b82f6', marginBottom:4 }}>SIMS AI</div>}
+                <div style={{ whiteSpace: 'pre-wrap' }}>{m.text}</div>
+              </div>
+            ))}
+            {loading && (
+              <div className="msg-ai">
+                <div style={{ fontSize:'0.68rem', fontWeight:700, color:'#3b82f6', marginBottom:4 }}>SIMS AI</div>
+                <div style={{ color:'#94a3b8' }}>Thinking…</div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="chat-input-row">
+            <input
+              className="chat-input"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && send()}
+              placeholder="Ask about drugs, protocols, diagnoses…"
+            />
+            <button className="chat-send" onClick={send} disabled={loading}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M22 2L11 13M22 2L15 22 11 13M11 13L2 9"/></svg>
+            </button>
+          </div>
+        </div>
+      )}
+      <button className="chat-btn" onClick={() => setOpen(!open)}>
+        <div className="chat-btn-pulse" />
+        {open
+          ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          : <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        }
+      </button>
+    </div>
+  );
+}
 
-// ─── DOCTOR ROUTES ────────────────────────────────────────────────────────────
+// ── LOGIN PAGE ─────────────────────────────────────────────────────────────────
+function LoginPage({ onLoginSuccess }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPw, setShowPw] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-app.get('/api/doctors', async (req, res) => {
-  try {
-    const doctors = await Doctor.find({}, { passwordHash: 0 }).sort({ registeredAt: -1 });
-    res.json(doctors);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch doctors', details: e.message });
-  }
-});
+  const features = [
+    { icon: '👤', label: 'Patient Registration & Management' },
+    { icon: '⚕️', label: 'Doctor Consultation & Scheduling' },
+    { icon: '🔬', label: 'Lab & Diagnostics Tracking' },
+    { icon: '🏥', label: 'Operation Theatre Management' },
+    { icon: '💊', label: 'Pharmacy & Billing System' },
+    { icon: '🤖', label: 'AI Clinical Decision Support' },
+  ];
+  const roles = [['📋','reception'],['⚕️','doctor'],['🔬','lab'],['💊','pharmacy'],['💳','billing'],['📊','admin']];
 
-app.post('/api/doctors', async (req, res) => {
-  try {
-    const { name, specialization, phone, email, qualification, password } = req.body;
-    if (!name || !specialization) return res.status(400).json({ error: 'Name and specialization are required' });
-    if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    const doctorId = 'DOC' + Date.now();
-    const passwordHash = await bcrypt.hash(password, 10);
-    const doctor = await Doctor.create({ doctorId, name, specialization, phone, email, qualification, passwordHash });
-    await logActivity('Doctor Registered', `Doctor ${doctorId} - ${name} (${specialization})`);
-    console.log(`✅ Doctor registered: ${name}`);
-    const { passwordHash: _, ...doctorData } = doctor.toObject();
-    res.status(201).json({ ...doctorData, loginId: doctorId });
-  } catch (e) {
-    if (e.name === 'ValidationError') return res.status(400).json({ error: 'Validation failed', details: e.message });
-    res.status(500).json({ error: 'Failed to register doctor', details: e.message });
-  }
-});
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(''); setLoading(true);
+    try {
+      const result = await AuthService.login(username, password);
+      if (result.success) onLoginSuccess(result.user);
+      else { setError(result.error); setPassword(''); }
+    } catch (e) {
+      setError('Connection error. Please try again.');
+    } finally { setLoading(false); }
+  };
 
-app.put('/api/doctors/:doctorId', async (req, res) => {
-  try {
-    const { name, specialization, phone, email, qualification } = req.body;
-    const doctor = await Doctor.findOneAndUpdate(
-      { doctorId: req.params.doctorId },
-      { name, specialization, phone, email, qualification },
-      { new: true, select: '-passwordHash' }
-    );
-    if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
-    await logActivity('Doctor Updated', `Doctor ${doctor.doctorId} - ${doctor.name} updated`);
-    res.json(doctor);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to update doctor', details: e.message });
-  }
-});
+  return (
+    <div className="login-page">
+      {/* LEFT VISUAL PANEL */}
+      <div className="login-visual">
+        {/* ECG Animation */}
+        <div className="ecg-line">
+          <svg viewBox="0 0 1000 60" preserveAspectRatio="none">
+            <path className="ecg-path" d="M0,30 L80,30 L100,30 L110,5 L120,55 L130,10 L140,30 L200,30 L280,30 L290,30 L300,5 L310,55 L320,10 L330,30 L400,30 L480,30 L490,30 L500,5 L510,55 L520,10 L530,30 L600,30 L680,30 L690,30 L700,5 L710,55 L720,10 L730,30 L800,30 L880,30 L890,30 L900,5 L910,55 L920,10 L930,30 L1000,30"/>
+          </svg>
+        </div>
 
-// ─── PATIENT ROUTES ───────────────────────────────────────────────────────────
+        <div style={{ position:'relative', zIndex:1, maxWidth:'440px' }}>
+          {/* Logo */}
+          <div style={{ display:'flex', alignItems:'center', gap:14, marginBottom:'2rem' }}>
+            <div className="login-cross">
+              <CrossSVG size={32} />
+            </div>
+            <div>
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <div style={{ fontFamily:'Playfair Display, serif', fontSize:'1.8rem', color:'white', fontWeight:700 }}>SIMS Hospital</div>
+                <div style={{ background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.18)', borderRadius:5, padding:'2px 8px', fontSize:'0.6rem', color:'rgba(255,255,255,0.5)', letterSpacing:'0.1em', textTransform:'uppercase' }}>SRM Group</div>
+              </div>
+              <div style={{ fontSize:'0.7rem', color:'rgba(255,255,255,0.35)', textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3 }}>Vadapalani, Chennai – 600 026</div>
+            </div>
+          </div>
 
-app.get('/api/patients', async (req, res) => {
-  try {
-    const patients = await Patient.find().sort({ registeredAt: -1 });
-    res.json(patients);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch patients', details: e.message });
-  }
-});
+          <div style={{ fontFamily:'Playfair Display, serif', fontSize:'2rem', color:'white', lineHeight:1.2, marginBottom:'0.75rem' }}>
+            Integrated Hospital<br/>Management System
+          </div>
+          <div style={{ color:'rgba(255,255,255,0.45)', fontSize:'0.88rem', lineHeight:1.65, marginBottom:'2rem' }}>
+            360° advanced tertiary healthcare management — connecting every department from OPD to OT to billing.
+          </div>
 
-app.get('/api/patients/:id', async (req, res) => {
-  try {
-    const patient = await Patient.findOne({ patientId: req.params.id });
-    if (!patient) return res.status(404).json({ error: 'Patient not found' });
-    res.json(patient);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch patient', details: e.message });
-  }
-});
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px', marginBottom:'2.5rem' }}>
+            {features.map(f => (
+              <div key={f.label} style={{ display:'flex', alignItems:'center', gap:8, color:'rgba(255,255,255,0.6)', fontSize:'0.8rem' }}>
+                <div style={{ width:28, height:28, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, flexShrink:0 }}>{f.icon}</div>
+                {f.label}
+              </div>
+            ))}
+          </div>
 
-app.post('/api/patients', async (req, res) => {
-  try {
-    const { firstName, lastName, age, gender, phone, address, chiefComplaint, assignedDoctorId } = req.body;
-    if (!firstName || !age || !gender || !chiefComplaint) {
-      return res.status(400).json({ error: 'First name, age, gender, and chief complaint are required' });
+          <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)', paddingTop:'1.5rem' }}>
+            <div style={{ fontSize:'0.65rem', color:'rgba(255,255,255,0.25)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:10 }}>Contact</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+              <div style={{ fontSize:'0.78rem', color:'rgba(255,255,255,0.4)' }}>🚨 Emergency: <span style={{ color:'rgba(255,255,255,0.65)' }}>+91 44 2000 2020</span></div>
+              <div style={{ fontSize:'0.78rem', color:'rgba(255,255,255,0.4)' }}>📅 Appointments: <span style={{ color:'rgba(255,255,255,0.65)' }}>+91 44 2000 2001</span></div>
+              <div style={{ fontSize:'0.78rem', color:'rgba(255,255,255,0.4)' }}>✉️ enquiry@simshospitals.com</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT FORM PANEL */}
+      <div className="login-form-panel">
+        <div style={{ marginBottom:'2rem' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'1.5rem' }}>
+            <div className="login-cross" style={{ width:40, height:40, borderRadius:11 }}>
+              <CrossSVG size={22} />
+            </div>
+            <div>
+              <div style={{ fontSize:'0.9rem', fontWeight:700, color:var_navy() }}>SIMS Hospital HMS</div>
+              <div style={{ fontSize:'0.68rem', color:'#94a3b8' }}>Secure Staff Portal</div>
+            </div>
+          </div>
+          <div style={{ fontFamily:'Playfair Display, serif', fontSize:'1.75rem', color:'#0b1f3a', marginBottom:6 }}>Welcome back</div>
+          <div style={{ fontSize:'0.85rem', color:'#94a3b8' }}>Sign in to the SIMS HMS · Vadapalani, Chennai</div>
+        </div>
+
+        <form onSubmit={handleLogin}>
+          <div className="form-field">
+            <label className="form-label">Username / Doctor ID</label>
+            <input className="form-input" type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Enter your username" autoFocus required />
+          </div>
+          <div className="form-field" style={{ position:'relative' }}>
+            <label className="form-label">Password</label>
+            <input className="form-input" type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Enter your password" style={{ paddingRight:44 }} required />
+            <button type="button" onClick={() => setShowPw(!showPw)} style={{ position:'absolute', right:13, top:30, background:'none', border:'none', cursor:'pointer', fontSize:16, color:'#cbd5e1' }}>
+              {showPw ? '🙈' : '👁️'}
+            </button>
+          </div>
+
+          {error && <div className="alert alert-error" style={{ marginBottom:'1rem' }}>⚠ {error}</div>}
+
+          <button type="submit" className="btn-primary" disabled={loading} style={{ marginBottom:'1.5rem' }}>
+            {loading ? <><span className="spinner" style={{ marginRight:8 }} />Authenticating…</> : 'Sign In →'}
+          </button>
+        </form>
+
+        <div style={{ background:'#f8fafc', border:'1px solid #e2e8f0', borderRadius:11, padding:'1rem' }}>
+          <div style={{ fontSize:'0.68rem', fontWeight:800, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.06em', marginBottom:10 }}>Available Roles</div>
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:6 }}>
+            {roles.map(([icon, role]) => (
+              <div key={role} className="role-pill" onClick={() => setUsername(role)}>
+                <span>{icon}</span> {role}
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize:'0.7rem', color:'#cbd5e1', marginTop:10 }}>Contact your administrator for credentials</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Helper to avoid template literal in JSX style attr
+function var_navy() { return '#0b1f3a'; }
+
+// ── MAIN APP ──────────────────────────────────────────────────────────────────
+function HospitalManagementSystem() {
+  const [currentModule, setCurrentModule] = useState('reception');
+  const [ready, setReady] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    if (AuthService.isAuthenticated()) {
+      const u = AuthService.getCurrentUser();
+      setIsAuthenticated(true);
+      setCurrentUser(u);
+      setCurrentModule(u.role);
     }
-    if (!assignedDoctorId) {
-      return res.status(400).json({ error: 'Please assign a doctor to the patient' });
+    fetch(`${API_URL}/health`, { cache:'no-store' })
+      .then(() => setReady(true))
+      .catch(() => setReady(true));
+  }, []);
+
+  const handleLoginSuccess = (user) => {
+    setIsAuthenticated(true);
+    setCurrentUser(user);
+    setCurrentModule(user.role);
+  };
+
+  const handleLogout = () => {
+    if (confirm('Sign out of SIMS HMS?')) {
+      AuthService.logout();
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setCurrentModule('reception');
     }
+  };
 
-    const patientId = 'PAT' + Date.now();
+  if (!ready) return (
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#0b1f3a', flexDirection:'column', gap:16 }}>
+      <div style={{ width:64, height:64, background:'linear-gradient(135deg,#1a56db,#0ea5e9)', borderRadius:18, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 8px 32px rgba(30,86,219,0.4)' }}>
+        <CrossSVG size={36} />
+      </div>
+      <div style={{ fontFamily:'Playfair Display, serif', fontSize:'1.4rem', color:'white' }}>SIMS Hospital</div>
+      <div style={{ fontSize:'0.7rem', color:'rgba(255,255,255,0.3)', textTransform:'uppercase', letterSpacing:'0.1em' }}>Vadapalani · SRM Group</div>
+      <div style={{ fontSize:'0.85rem', color:'rgba(255,255,255,0.4)', marginTop:8 }}>Connecting to server…</div>
+    </div>
+  );
 
-    // Create patient
-    const patient = await Patient.create({ patientId, firstName, lastName, age, gender, phone, address, chiefComplaint, assignedDoctorId });
+  if (!isAuthenticated) return <LoginPage onLoginSuccess={handleLoginSuccess} />;
 
-    // Auto-create registration bill
-    const billId = 'BILL' + Date.now();
-    const bill = await Bill.create({
-      billId,
-      patientId,
-      type: 'REGISTRATION',
-      items: [{ name: 'Consultation Fee', quantity: 1, price: 500, total: 500 }],
-      totalAmount: 500
-    });
+  const isAdmin = currentUser.role === 'admin';
+  const isDoctor = currentUser.role === 'doctor';
 
-    await logActivity('Patient Registered', `Patient ${patientId} - ${firstName} ${lastName || ''}`);
-    console.log(`✅ Patient registered: ${firstName} ${lastName || ''}`);
-    res.status(201).json({ patient, bill });
-  } catch (e) {
-    if (e.name === 'ValidationError') return res.status(400).json({ error: 'Validation failed', details: e.message });
-    res.status(500).json({ error: 'Failed to register patient', details: e.message });
-  }
-});
+  const canAccess = (mod) => {
+    if (isAdmin) return true;
+    return currentUser.role === mod;
+  };
 
-// ─── ENCOUNTER ROUTES ─────────────────────────────────────────────────────────
+  const modules = [
+    { id:'reception', label:'Reception', icon:'📋' },
+    { id:'doctor', label:'Doctor', icon:'⚕️' },
+    { id:'lab', label:'Laboratory', icon:'🔬' },
+    { id:'pharmacy', label:'Pharmacy', icon:'💊' },
+    { id:'billing', label:'Billing', icon:'💳' },
+    { id:'admin', label:'Admin', icon:'📊' },
+  ];
 
-app.get('/api/encounters', async (req, res) => {
-  try {
-    const encounters = await Encounter.find().sort({ createdAt: -1 });
-    res.json(encounters);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch encounters', details: e.message });
-  }
-});
+  return (
+    <div style={{ minHeight:'100vh', display:'flex', flexDirection:'column', background:'var(--surface)' }}>
+      <header className="hms-header">
+        <div className="header-logo">
+          <div className="header-cross"><CrossSVG size={18} /></div>
+          <div>
+            <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+              <span className="header-name">SIMS Hospital</span>
+              <span className="header-badge">SRM Group</span>
+            </div>
+            <div className="header-sub">Vadapalani, Chennai · Hospital Management System</div>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <div className="user-chip">
+            <div className="user-avatar">{currentUser.name.charAt(0).toUpperCase()}</div>
+            <div>
+              <div className="user-name">{currentUser.name}</div>
+              <div className="user-role">{currentUser.role}{currentUser.specialization ? ` · ${currentUser.specialization}` : ''}</div>
+            </div>
+          </div>
+          <button onClick={handleLogout} className="btn-logout">Sign Out</button>
+        </div>
+      </header>
 
-app.get('/api/encounters/patient/:patientId', async (req, res) => {
-  try {
-    const encounters = await Encounter.find({ patientId: req.params.patientId }).sort({ createdAt: -1 });
-    res.json(encounters);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch encounters', details: e.message });
-  }
-});
+      <nav className="hms-nav">
+        {modules.map(m => {
+          const ok = canAccess(m.id);
+          return (
+            <button
+              key={m.id}
+              onClick={() => { if (!ok) { alert(`Access denied: You don't have permission to view the ${m.label} module.`); return; } setCurrentModule(m.id); }}
+              className={`nav-btn ${currentModule === m.id ? 'active' : ''}`}
+              disabled={!ok}
+            >
+              <span>{m.icon}</span>
+              {m.label}
+              {!ok && <span style={{ fontSize:10, opacity:0.5 }}>🔒</span>}
+            </button>
+          );
+        })}
+      </nav>
 
-app.post('/api/encounters', async (req, res) => {
-  try {
-    const { patientId, doctorName, diagnosis, notes } = req.body;
-    if (!patientId || !doctorName || !diagnosis) {
-      return res.status(400).json({ error: 'Patient ID, doctor name, and diagnosis are required' });
+      <main className="hms-main" style={{ flex:1 }}>
+        <div className="animate-in">
+          {currentModule === 'reception' && <ReceptionModule currentUser={currentUser} />}
+          {currentModule === 'doctor' && <DoctorModule currentUser={currentUser} />}
+          {currentModule === 'lab' && <LabModule />}
+          {currentModule === 'pharmacy' && <PharmacyModule />}
+          {currentModule === 'billing' && <BillingModule />}
+          {currentModule === 'admin' && <AdminModule />}
+        </div>
+      </main>
+
+      <footer className="hms-footer">
+        <div className="footer-inner">
+          <div className="footer-left">
+            <strong>SIMS Hospital</strong> · No.1, Jawaharlal Nehru Salai, Vadapalani, Chennai – 600 026 · Part of <strong>SRM Group</strong>
+          </div>
+          <div className="footer-contacts">
+            <div className="footer-contact">Emergency <span>+91 44 2000 2020</span></div>
+            <div className="footer-contact">Appointments <span>+91 44 2000 2001</span></div>
+            <div className="footer-contact">enquiry@simshospitals.com</div>
+          </div>
+        </div>
+      </footer>
+
+      <AIChatbot currentUser={currentUser} />
+    </div>
+  );
+}
+
+// ── RECEPTION MODULE ──────────────────────────────────────────────────────────
+function ReceptionModule({ currentUser }) {
+  const [tab, setTab] = useState('patient');
+  const [patientForm, setPatientForm] = useState({ firstName:'', lastName:'', age:'', gender:'', phone:'', address:'', chiefComplaint:'', assignedDoctorId:'' });
+  const [doctorForm, setDoctorForm] = useState({ name:'', specialization:'', phone:'', email:'', qualification:'', password:'' });
+  const [msg, setMsg] = useState(null);
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQ, setSearchQ] = useState('');
+
+  const specs = ['Cardiology','Neurology','Orthopedics','Pediatrics','General Medicine','Dermatology','ENT','Psychiatry','Gynecology','Gastroenterology','Urology','Oncology','Nephrology'];
+  const complaints = ['Fever','Chest Pain','Headache','Abdominal Pain','Respiratory Issues','Joint Pain','Skin Problems','Mental Health','Pregnancy Related','Digestive Issues','Trauma / Injury','General Checkup','Pre-operative','Post-operative','Other'];
+
+  useEffect(() => { loadData(); }, []);
+  const loadData = async () => {
+    const [p, d] = await Promise.all([PatientService.getAllPatients(), DoctorManagementService.getAllDoctors()]);
+    setPatients(p.sort((a,b) => new Date(b.registeredAt)-new Date(a.registeredAt)));
+    setDoctors(d.sort((a,b) => a.name.localeCompare(b.name)));
+  };
+
+  const filteredPatients = patients.filter(p =>
+    !searchQ || `${p.firstName} ${p.lastName} ${p.patientId} ${p.phone}`.toLowerCase().includes(searchQ.toLowerCase())
+  );
+
+  const handlePatientSubmit = async (e) => {
+    e.preventDefault();
+    if (!patientForm.firstName || !patientForm.age || !patientForm.gender || !patientForm.chiefComplaint) {
+      setMsg({ type:'error', text:'Please fill all required fields.' }); return;
     }
-    const encounterId = 'ENC' + Date.now();
-    const encounter = await Encounter.create({ encounterId, patientId, doctorName, diagnosis, notes: notes || '' });
-    await logActivity('Encounter Created', `Encounter ${encounterId} by ${doctorName} for patient ${patientId}`);
-    console.log(`✅ Encounter created: ${encounterId}`);
-    res.status(201).json(encounter);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to create encounter', details: e.message });
-  }
-});
-
-// ─── LAB TEST ROUTES ──────────────────────────────────────────────────────────
-
-app.get('/api/labtests', async (req, res) => {
-  try {
-    const { status } = req.query;
-    const filter = status ? { status } : {};
-    const tests = await LabTest.find(filter).sort({ orderedAt: -1 });
-    res.json(tests);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch lab tests', details: e.message });
-  }
-});
-
-app.get('/api/labtests/encounter/:encounterId', async (req, res) => {
-  try {
-    const tests = await LabTest.find({ encounterId: req.params.encounterId }).sort({ orderedAt: -1 });
-    res.json(tests);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch lab tests', details: e.message });
-  }
-});
-
-app.post('/api/labtests/bulk', async (req, res) => {
-  try {
-    const { encounterId, patientId, tests } = req.body;
-    if (!encounterId || !patientId || !tests || !Array.isArray(tests)) {
-      return res.status(400).json({ error: 'encounterId, patientId, and tests array are required' });
+    if (!patientForm.assignedDoctorId) {
+      setMsg({ type:'error', text:'Please assign a doctor to this patient.' }); return;
     }
-    const created = [];
-    for (const test of tests) {
-      const testId = 'TEST' + Date.now() + Math.random().toString(36).substr(2, 5);
-      const labTest = await LabTest.create({ testId, encounterId, patientId, testName: test.testName });
-      created.push(labTest);
+    setLoading(true);
+    try {
+      const result = await PatientService.registerPatient(patientForm);
+      const doc = doctors.find(d => d.doctorId === patientForm.assignedDoctorId);
+      setMsg({ type:'success', text:`✅ Patient registered!\n\nPatient ID: ${result.patient.patientId}\nAssigned Doctor: Dr. ${doc?.name} (${doc?.specialization})\nBill: ${result.bill.billId} · ₹${result.bill.totalAmount}` });
+      setPatientForm({ firstName:'', lastName:'', age:'', gender:'', phone:'', address:'', chiefComplaint:'', assignedDoctorId:'' });
+      await loadData();
+    } catch (err) { setMsg({ type:'error', text:'❌ ' + err.message }); }
+    finally { setLoading(false); }
+  };
+
+  const handleDoctorSubmit = async (e) => {
+    e.preventDefault();
+    if (!doctorForm.name || !doctorForm.specialization) { setMsg({ type:'error', text:'Name and specialization are required.' }); return; }
+    if (!doctorForm.password || doctorForm.password.length < 6) { setMsg({ type:'error', text:'Password must be at least 6 characters.' }); return; }
+    setLoading(true);
+    try {
+      const result = await DoctorManagementService.registerDoctor(doctorForm);
+      setMsg({ type:'success', text:`✅ Doctor registered!\n\nLogin ID: ${result.doctorId}\nName: Dr. ${result.name}\nSpecialization: ${result.specialization}\n\n⚠️ Save this Login ID — the doctor will use it to sign in!` });
+      setDoctorForm({ name:'', specialization:'', phone:'', email:'', qualification:'', password:'' });
+      await loadData();
+    } catch (err) { setMsg({ type:'error', text:'❌ ' + err.message }); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div>
+      <h2 className="page-title">📋 Reception Desk</h2>
+
+      {msg && (
+        <div className={`alert ${msg.type === 'success' ? 'alert-success' : 'alert-error'}`} style={{ whiteSpace:'pre-line' }}>
+          {msg.text}
+          <button onClick={() => setMsg(null)} style={{ float:'right', background:'none', border:'none', cursor:'pointer', fontSize:16, color:'inherit' }}>×</button>
+        </div>
+      )}
+
+      <div className="tab-bar" style={{ maxWidth:360 }}>
+        <button className={`tab-btn ${tab==='patient'?'active':''}`} onClick={() => { setTab('patient'); setMsg(null); }}>👤 Register Patient</button>
+        <button className={`tab-btn ${tab==='doctor'?'active':''}`} onClick={() => { setTab('doctor'); setMsg(null); }}>⚕️ Register Doctor</button>
+        <button className={`tab-btn ${tab==='list'?'active':''}`} onClick={() => { setTab('list'); setMsg(null); }}>📃 Patient List</button>
+      </div>
+
+      {tab === 'patient' && (
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.5rem' }}>
+          <div className="card">
+            <div className="card-title">Register New Patient</div>
+            {doctors.length === 0
+              ? <div className="alert alert-warn">⚠️ No doctors registered yet. Please register a doctor first in the "Register Doctor" tab.</div>
+              : (
+                <form onSubmit={handlePatientSubmit}>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem', marginBottom:'0.75rem' }}>
+                    <div><label className="lbl">First Name *</label><input className="inp" value={patientForm.firstName} onChange={e=>setPatientForm({...patientForm,firstName:e.target.value})} required /></div>
+                    <div><label className="lbl">Last Name</label><input className="inp" value={patientForm.lastName} onChange={e=>setPatientForm({...patientForm,lastName:e.target.value})} /></div>
+                  </div>
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem', marginBottom:'0.75rem' }}>
+                    <div><label className="lbl">Age *</label><input className="inp" type="number" min="0" max="150" value={patientForm.age} onChange={e=>setPatientForm({...patientForm,age:e.target.value})} required /></div>
+                    <div>
+                      <label className="lbl">Gender *</label>
+                      <select className="inp" value={patientForm.gender} onChange={e=>setPatientForm({...patientForm,gender:e.target.value})} required>
+                        <option value="">Select</option>
+                        <option>Male</option><option>Female</option><option>Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom:'0.75rem' }}><label className="lbl">Phone</label><input className="inp" type="tel" value={patientForm.phone} onChange={e=>setPatientForm({...patientForm,phone:e.target.value})} /></div>
+                  <div style={{ marginBottom:'0.75rem' }}><label className="lbl">Address</label><input className="inp" value={patientForm.address} onChange={e=>setPatientForm({...patientForm,address:e.target.value})} /></div>
+                  <div style={{ marginBottom:'0.75rem' }}>
+                    <label className="lbl">Chief Complaint *</label>
+                    <select className="inp" value={patientForm.chiefComplaint} onChange={e=>setPatientForm({...patientForm,chiefComplaint:e.target.value})} required>
+                      <option value="">Select complaint</option>
+                      {complaints.map(c => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ marginBottom:'1rem' }}>
+                    <label className="lbl">Assign Doctor *</label>
+                    <select className="inp" value={patientForm.assignedDoctorId} onChange={e=>setPatientForm({...patientForm,assignedDoctorId:e.target.value})} required>
+                      <option value="">Select doctor</option>
+                      {doctors.map(d => <option key={d.doctorId} value={d.doctorId}>Dr. {d.name} — {d.specialization}</option>)}
+                    </select>
+                    <div style={{ fontSize:'0.72rem', color:'#94a3b8', marginTop:4 }}>⚠️ Only the assigned doctor (and admin) can view this patient's records.</div>
+                  </div>
+                  <button type="submit" className="btn btn-blue" style={{ width:'100%', padding:'11px' }} disabled={loading}>
+                    {loading ? 'Registering…' : 'Register Patient →'}
+                  </button>
+                </form>
+              )
+            }
+          </div>
+
+          <div className="card">
+            <div className="card-title">Recent Registrations ({patients.length})</div>
+            <div style={{ maxHeight:500, overflowY:'auto', display:'flex', flexDirection:'column', gap:8 }}>
+              {patients.slice(0,15).map(p => {
+                const doc = doctors.find(d => d.doctorId === p.assignedDoctorId);
+                return (
+                  <div key={p.patientId} className="patient-row" style={{ cursor:'default' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                      <div>
+                        <div style={{ fontWeight:700, fontSize:'0.92rem' }}>{p.firstName} {p.lastName}</div>
+                        <div style={{ fontSize:'0.78rem', color:'#64748b' }}>{p.patientId} · Age {p.age} · {p.gender}</div>
+                        {p.phone && <div style={{ fontSize:'0.75rem', color:'#94a3b8' }}>📞 {p.phone}</div>}
+                      </div>
+                      <div style={{ textAlign:'right' }}>
+                        <span className="badge badge-blue">{p.chiefComplaint}</span>
+                        {doc && <div style={{ fontSize:'0.72rem', color:'#64748b', marginTop:4 }}>Dr. {doc.name}</div>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {patients.length === 0 && <div style={{ textAlign:'center', color:'#94a3b8', padding:'2rem', fontSize:'0.88rem' }}>No patients registered yet</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'doctor' && (
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.5rem' }}>
+          <div className="card">
+            <div className="card-title">Register New Doctor</div>
+            <form onSubmit={handleDoctorSubmit}>
+              <div style={{ marginBottom:'0.75rem' }}><label className="lbl">Full Name *</label><input className="inp" value={doctorForm.name} onChange={e=>setDoctorForm({...doctorForm,name:e.target.value})} required /></div>
+              <div style={{ marginBottom:'0.75rem' }}>
+                <label className="lbl">Specialization *</label>
+                <select className="inp" value={doctorForm.specialization} onChange={e=>setDoctorForm({...doctorForm,specialization:e.target.value})} required>
+                  <option value="">Select specialization</option>
+                  {specs.map(s => <option key={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{ marginBottom:'0.75rem' }}><label className="lbl">Qualification</label><input className="inp" placeholder="e.g. MBBS, MD" value={doctorForm.qualification} onChange={e=>setDoctorForm({...doctorForm,qualification:e.target.value})} /></div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem', marginBottom:'0.75rem' }}>
+                <div><label className="lbl">Phone</label><input className="inp" type="tel" value={doctorForm.phone} onChange={e=>setDoctorForm({...doctorForm,phone:e.target.value})} /></div>
+                <div><label className="lbl">Email</label><input className="inp" type="email" value={doctorForm.email} onChange={e=>setDoctorForm({...doctorForm,email:e.target.value})} /></div>
+              </div>
+              <div style={{ marginBottom:'1rem' }}><label className="lbl">Login Password *</label><input className="inp" type="password" value={doctorForm.password} onChange={e=>setDoctorForm({...doctorForm,password:e.target.value})} minLength="6" required /></div>
+              <button type="submit" className="btn btn-blue" style={{ width:'100%', padding:'11px' }} disabled={loading}>
+                {loading ? 'Registering…' : 'Register Doctor →'}
+              </button>
+            </form>
+          </div>
+
+          <div className="card">
+            <div className="card-title">Registered Doctors ({doctors.length})</div>
+            <div style={{ maxHeight:480, overflowY:'auto', display:'flex', flexDirection:'column', gap:8 }}>
+              {doctors.map(d => (
+                <div key={d.doctorId} className="patient-row" style={{ cursor:'default' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                    <div>
+                      <div style={{ fontWeight:700 }}>Dr. {d.name}</div>
+                      <div style={{ fontSize:'0.78rem', color:'#64748b' }}>{d.doctorId}</div>
+                      {d.qualification && <div style={{ fontSize:'0.75rem', color:'#94a3b8' }}>{d.qualification}</div>}
+                      {d.phone && <div style={{ fontSize:'0.75rem', color:'#94a3b8' }}>📞 {d.phone}</div>}
+                    </div>
+                    <span className="badge badge-blue">{d.specialization}</span>
+                  </div>
+                </div>
+              ))}
+              {doctors.length === 0 && <div style={{ textAlign:'center', color:'#94a3b8', padding:'2rem', fontSize:'0.88rem' }}>No doctors registered yet</div>}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === 'list' && (
+        <div className="card">
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+            <div className="card-title" style={{ marginBottom:0 }}>All Patients ({patients.length})</div>
+            <input className="inp" style={{ width:240 }} placeholder="Search name, ID, phone…" value={searchQ} onChange={e=>setSearchQ(e.target.value)} />
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {filteredPatients.map(p => {
+              const doc = doctors.find(d => d.doctorId === p.assignedDoctorId);
+              return (
+                <div key={p.patientId} className="patient-row" style={{ cursor:'default', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                  <div>
+                    <div style={{ fontWeight:700 }}>{p.firstName} {p.lastName}</div>
+                    <div style={{ fontSize:'0.78rem', color:'#64748b' }}>{p.patientId} · Age {p.age} · {p.gender}</div>
+                    {p.phone && <div style={{ fontSize:'0.75rem', color:'#94a3b8' }}>📞 {p.phone}</div>}
+                  </div>
+                  <div style={{ textAlign:'right' }}>
+                    <span className="badge badge-blue">{p.chiefComplaint}</span>
+                    {doc && <div style={{ fontSize:'0.72rem', color:'#64748b', marginTop:4 }}>Dr. {doc.name} · {doc.specialization}</div>}
+                    <div style={{ fontSize:'0.7rem', color:'#cbd5e1', marginTop:2 }}>{new Date(p.registeredAt).toLocaleDateString()}</div>
+                  </div>
+                </div>
+              );
+            })}
+            {filteredPatients.length === 0 && <div style={{ textAlign:'center', color:'#94a3b8', padding:'2rem' }}>No patients found</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── DOCTOR MODULE ─────────────────────────────────────────────────────────────
+function DoctorModule({ currentUser }) {
+  const [tab, setTab] = useState('consultation');
+  const [step, setStep] = useState(1);
+  const [patients, setPatients] = useState([]);
+  const [allDoctors, setAllDoctors] = useState([]);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [diagnosis, setDiagnosis] = useState('');
+  const [notes, setNotes] = useState('');
+  const [labTests, setLabTests] = useState([]);
+  const [medicines, setMedicines] = useState([]);
+  const [msg, setMsg] = useState(null);
+  const [encounters, setEncounters] = useState([]);
+  const [encounterTests, setEncounterTests] = useState([]);
+  const [selectedEncounter, setSelectedEncounter] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchQ, setSearchQ] = useState('');
+
+  // Operation scheduling
+  const [ops, setOps] = useState([]);
+  const [opForm, setOpForm] = useState({ patientName:'', patientId:'', procedure:'', theatre:'OT-1', scheduledAt:'', notes:'' });
+  const [cancelId, setCancelId] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
+
+  // Doctor settings
+  const [profileForm, setProfileForm] = useState({ phone:'', email:'', qualification:'', consultationFee:'' });
+  const [availability, setAvailability] = useState({ mon:true, tue:true, wed:true, thu:true, fri:true, sat:false, sun:false });
+  const [settingsSaved, setSettingsSaved] = useState(false);
+
+  const isDoctor = currentUser.role === 'doctor';
+  const isAdmin = currentUser.role === 'admin';
+  const doctorId = isDoctor ? currentUser.username : null;
+
+  const availableTests = ['Complete Blood Count (CBC)','Blood Sugar (Fasting)','Blood Sugar (PP)','Lipid Profile','Liver Function Test (LFT)','Kidney Function Test (KFT)','Thyroid Profile (T3, T4, TSH)','Urine Analysis','X-Ray Chest','ECG','Hemoglobin A1c','Vitamin D','Vitamin B12','HIV Screening','Serum Creatinine'];
+
+  useEffect(() => { loadPatients(); loadDoctors(); loadOps(); }, []);
+  const loadPatients = async () => {
+    const all = await PatientService.getAllPatients();
+    // RULE: doctors only see their own patients; admin sees all
+    const filtered = isDoctor
+      ? all.filter(p => p.assignedDoctorId === doctorId)
+      : all;
+    setPatients(filtered.sort((a,b) => new Date(b.registeredAt)-new Date(a.registeredAt)));
+  };
+  const loadDoctors = async () => { const d = await DoctorManagementService.getAllDoctors(); setAllDoctors(d); };
+  const loadOps = () => {
+    const all = isDoctor ? OperationService.getByDoctor(doctorId) : OperationService.getAll();
+    setOps(all);
+  };
+
+  const filteredPatients = patients.filter(p =>
+    !searchQ || `${p.firstName} ${p.lastName} ${p.patientId}`.toLowerCase().includes(searchQ.toLowerCase())
+  );
+
+  const selectPatient = async (p) => {
+    setSelectedPatient(p);
+    setStep(2);
+    setMsg(null);
+    const encs = await DoctorService.getEncountersByPatient(p.patientId);
+    setEncounters(encs.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)));
+  };
+
+  const viewEncounter = async (enc) => {
+    if (selectedEncounter?.encounterId === enc.encounterId) { setSelectedEncounter(null); setEncounterTests([]); }
+    else { setSelectedEncounter(enc); const t = await DoctorService.getLabTestsByEncounter(enc.encounterId); setEncounterTests(t); }
+  };
+
+  const handleSubmit = async () => {
+    if (!diagnosis) { setMsg({ type:'error', text:'Please enter a diagnosis.' }); return; }
+    if (labTests.length === 0 && medicines.length === 0) { setMsg({ type:'error', text:'Please order at least one lab test or medicine.' }); return; }
+    setLoading(true);
+    try {
+      const docName = isDoctor ? currentUser.name : (allDoctors.find(d => d.doctorId === selectedPatient.assignedDoctorId)?.name || 'Doctor');
+      const enc = await DoctorService.createEncounter({ patientId: selectedPatient.patientId, doctorName: docName, diagnosis, notes });
+      if (labTests.length > 0) await DoctorService.orderLabTests(enc.encounterId, selectedPatient.patientId, labTests);
+      const validMeds = medicines.filter(m => m.medicineName && m.dosage);
+      if (validMeds.length > 0) await DoctorService.createPrescription({ encounterId: enc.encounterId, patientId: selectedPatient.patientId, medicines: validMeds });
+      setMsg({ type:'success', text:`✅ Encounter created!\n\nEncounter ID: ${enc.encounterId}\nLab Tests: ${labTests.length}\nMedicines: ${validMeds.length}` });
+      setDiagnosis(''); setNotes(''); setLabTests([]); setMedicines([]);
+      setTimeout(() => { setStep(1); setSelectedPatient(null); setMsg(null); }, 3000);
+    } catch (err) { setMsg({ type:'error', text:'❌ ' + err.message }); }
+    finally { setLoading(false); }
+  };
+
+  const scheduleOp = (e) => {
+    e.preventDefault();
+    if (!opForm.patientName || !opForm.procedure || !opForm.scheduledAt) { alert('Please fill required fields.'); return; }
+    OperationService.schedule({ ...opForm, doctorId: doctorId || 'admin', doctorName: currentUser.name });
+    setOpForm({ patientName:'', patientId:'', procedure:'', theatre:'OT-1', scheduledAt:'', notes:'' });
+    loadOps();
+  };
+
+  const handleCancel = () => {
+    if (!cancelReason.trim()) { alert('Please provide a cancellation reason.'); return; }
+    OperationService.cancel(cancelId, cancelReason);
+    setCancelId(null); setCancelReason('');
+    loadOps();
+  };
+
+  const saveSettings = () => {
+    localStorage.setItem(`sims_doctor_settings_${doctorId}`, JSON.stringify({ profileForm, availability }));
+    setSettingsSaved(true);
+    setTimeout(() => setSettingsSaved(false), 2000);
+  };
+
+  useEffect(() => {
+    if (doctorId) {
+      const saved = localStorage.getItem(`sims_doctor_settings_${doctorId}`);
+      if (saved) { try { const d = JSON.parse(saved); setProfileForm(d.profileForm); setAvailability(d.availability); } catch {} }
     }
-    await logActivity('Lab Tests Ordered', `${tests.length} tests ordered for encounter ${encounterId}`);
-    res.status(201).json(created);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to order lab tests', details: e.message });
-  }
-});
+  }, [doctorId]);
 
-app.put('/api/labtests/:testId/result', async (req, res) => {
-  try {
-    const { result } = req.body;
-    if (!result || !result.trim()) return res.status(400).json({ error: 'Result is required' });
-    const test = await LabTest.findOneAndUpdate(
-      { testId: req.params.testId },
-      { result, status: 'COMPLETED', completedAt: new Date() },
-      { new: true }
-    );
-    if (!test) return res.status(404).json({ error: 'Lab test not found' });
-    await logActivity('Lab Test Completed', `Test ${test.testId} (${test.testName}) completed for patient ${test.patientId}`);
-    console.log(`✅ Lab test completed: ${test.testName}`);
-    res.json(test);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to update test result', details: e.message });
-  }
-});
+  const tabs = [
+    { id:'consultation', label:'Consultation', icon:'🩺' },
+    { id:'operations', label:'Operations / OT', icon:'🏥' },
+    ...(isDoctor ? [{ id:'settings', label:'My Settings', icon:'⚙️' }] : []),
+  ];
 
-// ─── PRESCRIPTION ROUTES ──────────────────────────────────────────────────────
+  const opStatusColor = { scheduled:'badge-blue', completed:'badge-green', cancelled:'badge-red' };
 
-app.get('/api/prescriptions', async (req, res) => {
-  try {
-    const { status } = req.query;
-    const filter = status ? { status } : {};
-    const prescriptions = await Prescription.find(filter).sort({ createdAt: -1 });
-    res.json(prescriptions);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch prescriptions', details: e.message });
-  }
-});
+  return (
+    <div>
+      <h2 className="page-title">⚕️ Doctor Module</h2>
+      {isDoctor && (
+        <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:10, padding:'10px 14px', marginBottom:'1rem', fontSize:'0.82rem', color:'#1d4ed8' }}>
+          🔐 Showing only patients assigned to <strong>Dr. {currentUser.name}</strong>. You can only view and treat your own patients.
+        </div>
+      )}
 
-app.post('/api/prescriptions', async (req, res) => {
-  try {
-    const { encounterId, patientId, medicines } = req.body;
-    if (!encounterId || !patientId || !medicines || medicines.length === 0) {
-      return res.status(400).json({ error: 'encounterId, patientId, and medicines are required' });
-    }
-    const prescriptionId = 'PRESC' + Date.now();
-    const prescription = await Prescription.create({ prescriptionId, encounterId, patientId, medicines });
-    await logActivity('Prescription Created', `Prescription ${prescriptionId} for encounter ${encounterId} with ${medicines.length} medicines`);
-    console.log(`✅ Prescription created: ${prescriptionId}`);
-    res.status(201).json(prescription);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to create prescription', details: e.message });
-  }
-});
+      <div className="tab-bar" style={{ maxWidth: tabs.length * 160 }}>
+        {tabs.map(t => (
+          <button key={t.id} className={`tab-btn ${tab===t.id?'active':''}`} onClick={() => { setTab(t.id); setMsg(null); }}>
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
 
-app.put('/api/prescriptions/:prescriptionId/issue', async (req, res) => {
-  try {
-    const { medicines } = req.body;
-    const prescription = await Prescription.findOne({ prescriptionId: req.params.prescriptionId });
-    if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
-    if (prescription.status === 'ISSUED') return res.status(400).json({ error: 'Prescription already issued' });
+      {/* CONSULTATION TAB */}
+      {tab === 'consultation' && (
+        <>
+          {msg && <div className={`alert ${msg.type==='success'?'alert-success':'alert-error'}`} style={{ whiteSpace:'pre-line', marginBottom:'1rem' }}>{msg.text}</div>}
 
-    // Build pharmacy bill
-    const billId = 'BILL' + Date.now();
-    const items = medicines.map(med => ({
-      name: med.medicineName,
-      quantity: med.quantity,
-      price: med.price || 50,
-      total: (med.price || 50) * med.quantity
-    }));
-    const totalAmount = items.reduce((sum, item) => sum + item.total, 0);
+          {step === 1 && (
+            <div className="card">
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+                <div className="card-title" style={{ marginBottom:0 }}>Select Patient for Consultation ({patients.length} assigned)</div>
+                <input className="inp" style={{ width:220 }} placeholder="Search patients…" value={searchQ} onChange={e=>setSearchQ(e.target.value)} />
+              </div>
+              {filteredPatients.length === 0
+                ? <div style={{ textAlign:'center', padding:'2.5rem', color:'#94a3b8' }}>
+                    <div style={{ fontSize:'2.5rem', marginBottom:8 }}>👤</div>
+                    <div>{isDoctor ? 'No patients assigned to you yet.' : 'No patients registered yet.'}</div>
+                  </div>
+                : filteredPatients.map(p => {
+                    const doc = allDoctors.find(d => d.doctorId === p.assignedDoctorId);
+                    return (
+                      <div key={p.patientId} className="patient-row" onClick={() => selectPatient(p)} style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                        <div>
+                          <div style={{ fontWeight:700, fontSize:'0.95rem' }}>{p.firstName} {p.lastName}</div>
+                          <div style={{ fontSize:'0.78rem', color:'#64748b' }}>{p.patientId} · Age {p.age} · {p.gender}</div>
+                          {p.phone && <div style={{ fontSize:'0.74rem', color:'#94a3b8' }}>📞 {p.phone}</div>}
+                        </div>
+                        <div style={{ textAlign:'right' }}>
+                          <span className="badge badge-blue">{p.chiefComplaint}</span>
+                          {doc && <div style={{ fontSize:'0.72rem', color:'#64748b', marginTop:4 }}>Dr. {doc.name}</div>}
+                          <div style={{ marginTop:6 }}><button className="btn btn-blue" style={{ padding:'5px 12px', fontSize:'0.78rem' }}>Select →</button></div>
+                        </div>
+                      </div>
+                    );
+                  })
+              }
+            </div>
+          )}
 
-    const bill = await Bill.create({
-      billId,
-      patientId: prescription.patientId,
-      prescriptionId: prescription.prescriptionId,
-      type: 'PHARMACY',
-      items,
-      totalAmount
-    });
+          {step === 2 && selectedPatient && (
+            <div>
+              <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:11, padding:'1rem 1.25rem', marginBottom:'1.25rem', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:'1rem' }}>Patient: {selectedPatient.firstName} {selectedPatient.lastName}</div>
+                  <div style={{ fontSize:'0.8rem', color:'#64748b' }}>{selectedPatient.patientId} · Age {selectedPatient.age} · {selectedPatient.gender} · CC: {selectedPatient.chiefComplaint}</div>
+                </div>
+                <button className="btn btn-ghost" onClick={() => { setStep(1); setSelectedPatient(null); setMsg(null); }}>← Back</button>
+              </div>
 
-    // Mark prescription as issued
-    prescription.status = 'ISSUED';
-    prescription.issuedAt = new Date();
-    await prescription.save();
+              {encounters.length > 0 && (
+                <div className="card" style={{ marginBottom:'1.25rem' }}>
+                  <div className="card-title">Previous Encounters ({encounters.length})</div>
+                  {encounters.map(enc => (
+                    <div key={enc.encounterId} className="patient-row" style={{ cursor:'pointer' }} onClick={() => viewEncounter(enc)}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                        <div>
+                          <div style={{ fontWeight:700, color:'#1d4ed8' }}>{enc.doctorName}</div>
+                          <div style={{ fontSize:'0.82rem' }}><strong>Dx:</strong> {enc.diagnosis}</div>
+                          {enc.notes && <div style={{ fontSize:'0.78rem', color:'#64748b' }}>{enc.notes}</div>}
+                          <div style={{ fontSize:'0.7rem', color:'#94a3b8', marginTop:3 }}>{new Date(enc.createdAt).toLocaleString()}</div>
+                        </div>
+                        <button className="btn btn-ghost" style={{ fontSize:'0.75rem' }}>{selectedEncounter?.encounterId === enc.encounterId ? 'Hide ▲' : 'Tests ▼'}</button>
+                      </div>
+                      {selectedEncounter?.encounterId === enc.encounterId && (
+                        <div style={{ marginTop:'1rem', paddingTop:'1rem', borderTop:'1px solid #f1f5f9' }}>
+                          {encounterTests.length === 0
+                            ? <div style={{ color:'#94a3b8', fontSize:'0.82rem' }}>No tests ordered</div>
+                            : encounterTests.map(t => (
+                              <div key={t.testId} style={{ background:'#f8fafc', borderRadius:8, padding:'8px 12px', marginBottom:6 }}>
+                                <div style={{ display:'flex', justifyContent:'space-between' }}>
+                                  <div style={{ fontWeight:600, fontSize:'0.85rem' }}>{t.testName}</div>
+                                  <span className={`badge ${t.status==='COMPLETED'?'badge-green':'badge-orange'}`}>{t.status}</span>
+                                </div>
+                                {t.result && <div style={{ fontSize:'0.8rem', color:'#059669', marginTop:4 }}>Result: {t.result}</div>}
+                              </div>
+                            ))
+                          }
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
 
-    await logActivity('Medicines Issued', `Prescription ${prescription.prescriptionId} issued — Bill ₹${totalAmount}`);
-    console.log(`✅ Medicines issued: ${prescription.prescriptionId}`);
-    res.json({ prescription, bill });
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to issue medicines', details: e.message });
-  }
-});
+              <div className="card">
+                <div className="card-title">➕ New Encounter</div>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.25rem' }}>
+                  <div>
+                    <div style={{ marginBottom:'0.75rem' }}>
+                      <label className="lbl">Diagnosis *</label>
+                      <input className="inp" value={diagnosis} onChange={e=>setDiagnosis(e.target.value)} placeholder="Primary diagnosis" />
+                    </div>
+                    <div style={{ marginBottom:'0.75rem' }}>
+                      <label className="lbl">Clinical Notes</label>
+                      <textarea className="inp" value={notes} onChange={e=>setNotes(e.target.value)} rows={3} placeholder="Observations, symptoms, plan…" />
+                    </div>
 
-// ─── BILLING ROUTES ───────────────────────────────────────────────────────────
+                    {/* Medicines */}
+                    <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:10, padding:'1rem' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.75rem' }}>
+                        <label className="lbl" style={{ margin:0 }}>💊 Prescription</label>
+                        <button type="button" className="btn btn-green" style={{ padding:'4px 10px', fontSize:'0.75rem' }} onClick={() => setMedicines([...medicines, { medicineName:'', dosage:'', duration:'', quantity:1, price:50 }])}>+ Add</button>
+                      </div>
+                      {medicines.map((m, i) => (
+                        <div key={i} style={{ background:'white', borderRadius:8, padding:'0.6rem', marginBottom:6, border:'1px solid #d1fae5' }}>
+                          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:6, marginBottom:4 }}>
+                            <input className="inp" style={{ padding:'6px 10px', fontSize:'0.8rem' }} placeholder="Medicine name *" value={m.medicineName} onChange={e=>{ const u=[...medicines]; u[i].medicineName=e.target.value; setMedicines(u); }} />
+                            <input className="inp" style={{ padding:'6px 10px', fontSize:'0.8rem' }} placeholder="Dosage *" value={m.dosage} onChange={e=>{ const u=[...medicines]; u[i].dosage=e.target.value; setMedicines(u); }} />
+                          </div>
+                          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 60px', gap:6 }}>
+                            <input className="inp" style={{ padding:'6px 10px', fontSize:'0.8rem' }} placeholder="Duration" value={m.duration} onChange={e=>{ const u=[...medicines]; u[i].duration=e.target.value; setMedicines(u); }} />
+                            <input className="inp" style={{ padding:'6px 10px', fontSize:'0.8rem' }} type="number" min="1" placeholder="Qty" value={m.quantity} onChange={e=>{ const u=[...medicines]; u[i].quantity=parseInt(e.target.value)||1; setMedicines(u); }} />
+                            <button type="button" onClick={() => setMedicines(medicines.filter((_,j)=>j!==i))} style={{ background:'#fee2e2', border:'1px solid #fecaca', color:'#b91c1c', borderRadius:6, cursor:'pointer', fontSize:13, fontWeight:700 }}>✕</button>
+                          </div>
+                        </div>
+                      ))}
+                      {medicines.length === 0 && <div style={{ color:'#94a3b8', fontSize:'0.8rem' }}>No medicines added</div>}
+                    </div>
+                  </div>
 
-app.get('/api/bills', async (req, res) => {
-  try {
-    const bills = await Bill.find().sort({ createdAt: -1 });
-    res.json(bills);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch bills', details: e.message });
-  }
-});
+                  <div>
+                    {/* Lab Tests */}
+                    <div style={{ background:'#f5f3ff', border:'1px solid #ddd6fe', borderRadius:10, padding:'1rem' }}>
+                      <label className="lbl">🔬 Order Lab Tests</label>
+                      <div style={{ display:'flex', flexWrap:'wrap', gap:6, maxHeight:250, overflowY:'auto' }}>
+                        {availableTests.map(t => {
+                          const selected = labTests.find(l => l.testName === t);
+                          return (
+                            <button key={t} type="button" onClick={() => selected ? setLabTests(labTests.filter(l=>l.testName!==t)) : setLabTests([...labTests, { testName: t }])}
+                              style={{ padding:'5px 10px', fontSize:'0.75rem', fontWeight:600, borderRadius:7, border:`1px solid ${selected?'#7c3aed':'#c4b5fd'}`, background:selected?'#7c3aed':'white', color:selected?'white':'#5b21b6', cursor:'pointer', transition:'all 0.15s' }}>
+                              {selected ? '✓ ' : ''}{t}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {labTests.length > 0 && <div style={{ marginTop:8, fontSize:'0.78rem', color:'#5b21b6', fontWeight:600 }}>{labTests.length} test{labTests.length>1?'s':''} selected</div>}
+                    </div>
+                  </div>
+                </div>
 
-app.get('/api/bills/patient/:patientId', async (req, res) => {
-  try {
-    const bills = await Bill.find({ patientId: req.params.patientId }).sort({ createdAt: -1 });
-    res.json(bills);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch bills', details: e.message });
-  }
-});
+                <div style={{ marginTop:'1.25rem', display:'flex', gap:10 }}>
+                  <button className="btn btn-blue" style={{ flex:1, padding:'11px' }} onClick={handleSubmit} disabled={loading}>
+                    {loading ? 'Creating…' : '✅ Create Encounter & Submit'}
+                  </button>
+                  <button className="btn btn-ghost" onClick={() => { setStep(1); setSelectedPatient(null); }}>Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
-// ─── ADMIN / STATS ROUTES ─────────────────────────────────────────────────────
+      {/* OPERATIONS TAB */}
+      {tab === 'operations' && (
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.5rem' }}>
+          <div className="card">
+            <div className="card-title">🗓 Schedule Operation</div>
+            <form onSubmit={scheduleOp}>
+              <div style={{ marginBottom:'0.75rem' }}>
+                <label className="lbl">Patient Name *</label>
+                <input className="inp" value={opForm.patientName} onChange={e=>setOpForm({...opForm,patientName:e.target.value})} placeholder="Patient full name" required />
+              </div>
+              <div style={{ marginBottom:'0.75rem' }}>
+                <label className="lbl">Patient ID</label>
+                <input className="inp" value={opForm.patientId} onChange={e=>setOpForm({...opForm,patientId:e.target.value})} placeholder="e.g. P-001" />
+              </div>
+              <div style={{ marginBottom:'0.75rem' }}>
+                <label className="lbl">Procedure / Operation *</label>
+                <input className="inp" value={opForm.procedure} onChange={e=>setOpForm({...opForm,procedure:e.target.value})} placeholder="e.g. Appendectomy, CABG" required />
+              </div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.75rem', marginBottom:'0.75rem' }}>
+                <div>
+                  <label className="lbl">Theatre</label>
+                  <select className="inp" value={opForm.theatre} onChange={e=>setOpForm({...opForm,theatre:e.target.value})}>
+                    {['OT-1','OT-2','OT-3','OT-4','Emergency OT'].map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="lbl">Date & Time *</label>
+                  <input className="inp" type="datetime-local" value={opForm.scheduledAt} onChange={e=>setOpForm({...opForm,scheduledAt:e.target.value})} required />
+                </div>
+              </div>
+              <div style={{ marginBottom:'1rem' }}>
+                <label className="lbl">Notes</label>
+                <textarea className="inp" rows={2} value={opForm.notes} onChange={e=>setOpForm({...opForm,notes:e.target.value})} placeholder="Pre-op instructions, team, etc." />
+              </div>
+              <button type="submit" className="btn btn-blue" style={{ width:'100%', padding:'11px' }}>Schedule Operation →</button>
+            </form>
+          </div>
 
-app.get('/api/stats', async (req, res) => {
-  try {
-    const [
-      totalPatients, totalEncounters, totalTests,
-      pendingTests, completedTests,
-      totalPrescriptions, pendingPrescriptions, issuedPrescriptions,
-      totalBills, bills, recentActivity
-    ] = await Promise.all([
-      Patient.countDocuments(),
-      Encounter.countDocuments(),
-      LabTest.countDocuments(),
-      LabTest.countDocuments({ status: 'PENDING' }),
-      LabTest.countDocuments({ status: 'COMPLETED' }),
-      Prescription.countDocuments(),
-      Prescription.countDocuments({ status: 'PENDING' }),
-      Prescription.countDocuments({ status: 'ISSUED' }),
-      Bill.countDocuments(),
-      Bill.find(),
-      ActivityLog.find().sort({ timestamp: -1 }).limit(15)
-    ]);
+          <div className="card">
+            <div className="card-title">Operation Schedule ({ops.length})</div>
+            {cancelId && (
+              <div style={{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:10, padding:'1rem', marginBottom:'1rem' }}>
+                <div style={{ fontWeight:700, marginBottom:8, color:'#b91c1c' }}>Cancel Operation</div>
+                <textarea className="inp" rows={2} placeholder="Reason for cancellation *" value={cancelReason} onChange={e=>setCancelReason(e.target.value)} />
+                <div style={{ display:'flex', gap:8, marginTop:8 }}>
+                  <button className="btn btn-red" style={{ flex:1 }} onClick={handleCancel}>Confirm Cancel</button>
+                  <button className="btn btn-ghost" onClick={() => { setCancelId(null); setCancelReason(''); }}>Back</button>
+                </div>
+              </div>
+            )}
+            <div style={{ maxHeight:450, overflowY:'auto', display:'flex', flexDirection:'column', gap:8 }}>
+              {ops.length === 0
+                ? <div style={{ textAlign:'center', color:'#94a3b8', padding:'2rem', fontSize:'0.88rem' }}>No operations scheduled</div>
+                : ops.map(op => (
+                  <div key={op.id} className={`op-card ${op.status}`}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                      <div>
+                        <div style={{ fontWeight:700, fontSize:'0.92rem' }}>{op.procedure}</div>
+                        <div style={{ fontSize:'0.8rem', color:'#64748b' }}>Patient: {op.patientName} {op.patientId && `(${op.patientId})`}</div>
+                        <div style={{ fontSize:'0.78rem', color:'#64748b' }}>{op.theatre} · {new Date(op.scheduledAt).toLocaleString()}</div>
+                        {op.doctorName && <div style={{ fontSize:'0.75rem', color:'#94a3b8' }}>Dr. {op.doctorName}</div>}
+                        {op.cancelReason && <div style={{ fontSize:'0.75rem', color:'#b91c1c', marginTop:3 }}>Cancelled: {op.cancelReason}</div>}
+                        {op.notes && <div style={{ fontSize:'0.75rem', color:'#94a3b8', marginTop:2 }}>{op.notes}</div>}
+                      </div>
+                      <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6 }}>
+                        <span className={`badge ${opStatusColor[op.status]}`}>{op.status}</span>
+                        {op.status === 'scheduled' && (
+                          <>
+                            <button className="btn" style={{ padding:'3px 8px', fontSize:'0.72rem', background:'#d1fae5', color:'#065f46', border:'1px solid #6ee7b7' }} onClick={() => { OperationService.complete(op.id); loadOps(); }}>✓ Done</button>
+                            <button className="btn" style={{ padding:'3px 8px', fontSize:'0.72rem', background:'#fee2e2', color:'#991b1b', border:'1px solid #fca5a5' }} onClick={() => { setCancelId(op.id); setCancelReason(''); }}>✕ Cancel</button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      )}
 
-    const totalRevenue = bills.reduce((sum, b) => sum + b.totalAmount, 0);
+      {/* DOCTOR SETTINGS TAB */}
+      {tab === 'settings' && isDoctor && (
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1.5rem' }}>
+          <div className="card">
+            <div className="card-title">⚙️ Profile Settings</div>
+            {settingsSaved && <div className="alert alert-success">✅ Settings saved!</div>}
+            <div style={{ marginBottom:'0.75rem' }}><label className="lbl">Phone</label><input className="inp" value={profileForm.phone} onChange={e=>setProfileForm({...profileForm,phone:e.target.value})} placeholder="+91 XXXXX XXXXX" /></div>
+            <div style={{ marginBottom:'0.75rem' }}><label className="lbl">Email</label><input className="inp" type="email" value={profileForm.email} onChange={e=>setProfileForm({...profileForm,email:e.target.value})} /></div>
+            <div style={{ marginBottom:'0.75rem' }}><label className="lbl">Qualifications</label><input className="inp" value={profileForm.qualification} onChange={e=>setProfileForm({...profileForm,qualification:e.target.value})} placeholder="MBBS, MD, DM…" /></div>
+            <div style={{ marginBottom:'1rem' }}><label className="lbl">Consultation Fee (₹)</label><input className="inp" type="number" value={profileForm.consultationFee} onChange={e=>setProfileForm({...profileForm,consultationFee:e.target.value})} placeholder="500" /></div>
+            <button className="btn btn-blue" style={{ width:'100%', padding:'11px' }} onClick={saveSettings}>Save Profile</button>
+          </div>
 
-    res.json({
-      totalPatients, totalEncounters, totalTests,
-      pendingTests, completedTests,
-      totalPrescriptions, pendingPrescriptions, issuedPrescriptions,
-      totalBills, totalRevenue,
-      recentActivity
-    });
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch stats', details: e.message });
-  }
-});
+          <div className="card">
+            <div className="card-title">📅 Weekly Availability</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:'1.25rem' }}>
+              {Object.entries(availability).map(([day, on]) => (
+                <div key={day} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px', background: on ? '#eff6ff' : '#f8fafc', borderRadius:9, border:`1px solid ${on?'#bfdbfe':'#e2e8f0'}` }}>
+                  <span style={{ fontWeight:600, textTransform:'capitalize', color: on ? '#1d4ed8' : '#94a3b8' }}>{day.charAt(0).toUpperCase()+day.slice(1)}</span>
+                  <button onClick={() => setAvailability({...availability,[day]:!on})}
+                    style={{ width:44, height:24, borderRadius:12, border:'none', cursor:'pointer', background: on ? '#1d4ed8' : '#e2e8f0', position:'relative', transition:'all 0.2s' }}>
+                    <div style={{ width:18, height:18, borderRadius:'50%', background:'white', position:'absolute', top:3, left: on ? 23 : 3, transition:'all 0.2s', boxShadow:'0 1px 3px rgba(0,0,0,0.2)' }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button className="btn btn-blue" style={{ width:'100%', padding:'11px' }} onClick={saveSettings}>Save Availability</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-app.get('/api/activitylog', async (req, res) => {
-  try {
-    const logs = await ActivityLog.find().sort({ timestamp: -1 }).limit(50);
-    res.json(logs);
-  } catch (e) {
-    res.status(500).json({ error: 'Failed to fetch activity log', details: e.message });
-  }
-});
+// ── LAB MODULE ────────────────────────────────────────────────────────────────
+function LabModule() {
+  const [tab, setTab] = useState('pending');
+  const [tests, setTests] = useState([]);
+  const [results, setResults] = useState({});
+  const [msg, setMsg] = useState(null);
 
-// ─── 404 & ERROR HANDLERS ─────────────────────────────────────────────────────
-app.use((req, res) => res.status(404).json({ error: `Route ${req.method} ${req.path} not found` }));
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
+  useEffect(() => { loadTests(); }, [tab]);
+  const loadTests = async () => {
+    const data = tab === 'pending' ? await LabService.getPendingTests() : await LabService.getAllTests();
+    setTests(data.sort((a,b) => new Date(b.orderedAt)-new Date(a.orderedAt)));
+  };
 
-// ─── Start Server ──────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🏥 HMS Backend running on port ${PORT}`);
-  console.log(`📡 API: http://localhost:${PORT}/api`);
-});
+  const submit = async (testId) => {
+    if (!results[testId]?.trim()) { setMsg({ type:'error', text:'Please enter a result.' }); return; }
+    try {
+      await LabService.updateTestResult(testId, results[testId]);
+      setMsg({ type:'success', text:'✅ Result submitted!' });
+      setResults(r => { const n={...r}; delete n[testId]; return n; });
+      await loadTests();
+    } catch (e) { setMsg({ type:'error', text:'❌ ' + e.message }); }
+  };
+
+  return (
+    <div>
+      <h2 className="page-title">🔬 Laboratory</h2>
+      {msg && <div className={`alert ${msg.type==='success'?'alert-success':'alert-error'}`}>{msg.text}<button onClick={()=>setMsg(null)} style={{float:'right',background:'none',border:'none',cursor:'pointer',fontSize:16}}>×</button></div>}
+      <div className="tab-bar" style={{ maxWidth:300 }}>
+        <button className={`tab-btn ${tab==='pending'?'active':''}`} onClick={() => setTab('pending')}>⏳ Pending</button>
+        <button className={`tab-btn ${tab==='all'?'active':''}`} onClick={() => setTab('all')}>📋 All Tests</button>
+      </div>
+      <div className="card">
+        <div className="card-title">{tab==='pending'?'Pending Tests':'All Lab Tests'} ({tests.length})</div>
+        {tests.length === 0
+          ? <div style={{ textAlign:'center', padding:'2rem', color:'#94a3b8' }}>No tests {tab==='pending'?'pending':''}</div>
+          : tests.map(t => (
+            <div key={t.testId} className="patient-row" style={{ cursor:'default' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                <div>
+                  <div style={{ fontWeight:700 }}>{t.testName}</div>
+                  <div style={{ fontSize:'0.78rem', color:'#64748b' }}>Patient: {t.patientId} · Encounter: {t.encounterId}</div>
+                  <div style={{ fontSize:'0.72rem', color:'#94a3b8' }}>{new Date(t.orderedAt).toLocaleString()}</div>
+                </div>
+                <span className={`badge ${t.status==='COMPLETED'?'badge-green':'badge-orange'}`}>{t.status}</span>
+              </div>
+              {t.status === 'COMPLETED' && t.result && (
+                <div style={{ marginTop:8, padding:'8px 12px', background:'#f0fdf4', borderRadius:8, fontSize:'0.82rem', color:'#065f46' }}>
+                  <strong>Result:</strong> {t.result}
+                </div>
+              )}
+              {t.status === 'PENDING' && (
+                <div style={{ marginTop:10, display:'flex', gap:8 }}>
+                  <input className="inp" style={{ flex:1 }} placeholder="Enter result…" value={results[t.testId]||''} onChange={e=>setResults(r=>({...r,[t.testId]:e.target.value}))} />
+                  <button className="btn btn-green" onClick={() => submit(t.testId)}>Submit</button>
+                </div>
+              )}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
+}
+
+// ── PHARMACY MODULE ───────────────────────────────────────────────────────────
+function PharmacyModule() {
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => { load(); }, []);
+  const load = async () => {
+    const p = await PharmacyService.getPendingPrescriptions();
+    setPrescriptions(p.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)));
+  };
+
+  const issue = async (px) => {
+    setLoading(true);
+    try {
+      const result = await PharmacyService.issueMedicines(px.prescriptionId, px.medicines);
+      setMsg({ type:'success', text:`✅ Medicines issued! Bill: ${result.bill.billId} · ₹${result.bill.totalAmount}` });
+      await load();
+    } catch (e) { setMsg({ type:'error', text:'❌ ' + e.message }); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div>
+      <h2 className="page-title">💊 Pharmacy</h2>
+      {msg && <div className={`alert ${msg.type==='success'?'alert-success':'alert-error'}`}>{msg.text}<button onClick={()=>setMsg(null)} style={{float:'right',background:'none',border:'none',cursor:'pointer',fontSize:16}}>×</button></div>}
+      <div className="card">
+        <div className="card-title">Pending Prescriptions ({prescriptions.length})</div>
+        {prescriptions.length === 0
+          ? <div style={{ textAlign:'center', padding:'2rem', color:'#94a3b8' }}>No pending prescriptions</div>
+          : prescriptions.map(px => (
+            <div key={px.prescriptionId} className="patient-row" style={{ cursor:'default' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:8 }}>
+                <div>
+                  <div style={{ fontWeight:700 }}>{px.prescriptionId}</div>
+                  <div style={{ fontSize:'0.78rem', color:'#64748b' }}>Patient: {px.patientId} · {new Date(px.createdAt).toLocaleString()}</div>
+                </div>
+                <span className="badge badge-orange">PENDING</span>
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:4, marginBottom:10 }}>
+                {px.medicines.map((m, i) => (
+                  <div key={i} style={{ display:'flex', justifyContent:'space-between', background:'#f8fafc', borderRadius:7, padding:'6px 10px', fontSize:'0.82rem' }}>
+                    <span><strong>{m.medicineName}</strong> · {m.dosage} · {m.duration}</span>
+                    <span style={{ color:'#64748b' }}>Qty: {m.quantity} · ₹{m.price}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <div style={{ fontWeight:700, color:'#059669' }}>Total: ₹{px.medicines.reduce((s,m) => s+m.quantity*m.price, 0)}</div>
+                <button className="btn btn-green" onClick={() => issue(px)} disabled={loading}>Issue Medicines →</button>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  );
+}
+
+// ── BILLING MODULE ────────────────────────────────────────────────────────────
+function BillingModule() {
+  const [patientId, setPatientId] = useState('');
+  const [bills, setBills] = useState(null);
+  const [allBills, setAllBills] = useState([]);
+  const [tab, setTab] = useState('search');
+
+  useEffect(() => { if (tab === 'all') BillingService.getAllBills().then(b => setAllBills(b.sort((a,bv)=>new Date(bv.createdAt)-new Date(a.createdAt)))); }, [tab]);
+
+  const search = async (e) => {
+    e.preventDefault();
+    if (!patientId.trim()) return;
+    const b = await BillingService.getBillsByPatient(patientId.trim());
+    setBills(b.sort((a,bv) => new Date(bv.createdAt)-new Date(a.createdAt)));
+  };
+
+  const BillCard = ({ bill }) => (
+    <div className="patient-row" style={{ cursor:'default' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
+        <div>
+          <div style={{ fontWeight:800, fontSize:'1.05rem' }}>{bill.billId}</div>
+          <span className={`badge ${bill.type==='REGISTRATION'?'badge-blue':'badge-green'}`}>{bill.type==='REGISTRATION'?'📋 Registration':'💊 Pharmacy'}</span>
+          <div style={{ fontSize:'0.72rem', color:'#94a3b8', marginTop:4 }}>{new Date(bill.createdAt).toLocaleString()}</div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontSize:'1.6rem', fontWeight:800, color:'#059669' }}>₹{bill.totalAmount}</div>
+          <div style={{ fontSize:'0.72rem', color:'#94a3b8' }}>Patient: {bill.patientId}</div>
+        </div>
+      </div>
+      <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'0.82rem' }}>
+        <thead><tr style={{ background:'#f1f5f9' }}><th style={{ textAlign:'left', padding:'6px 10px' }}>Item</th><th style={{ textAlign:'center', padding:'6px 10px' }}>Qty</th><th style={{ textAlign:'right', padding:'6px 10px' }}>Price</th><th style={{ textAlign:'right', padding:'6px 10px' }}>Total</th></tr></thead>
+        <tbody>
+          {bill.items.map((item, i) => (
+            <tr key={i} style={{ borderBottom:'1px solid #f1f5f9' }}>
+              <td style={{ padding:'6px 10px' }}>{item.name}</td>
+              <td style={{ textAlign:'center', padding:'6px 10px' }}>{item.quantity}</td>
+              <td style={{ textAlign:'right', padding:'6px 10px' }}>₹{item.price}</td>
+              <td style={{ textAlign:'right', padding:'6px 10px', fontWeight:700 }}>₹{item.total}</td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot><tr style={{ background:'#f0fdf4' }}><td colSpan="3" style={{ textAlign:'right', padding:'8px 10px', fontWeight:800 }}>Grand Total</td><td style={{ textAlign:'right', padding:'8px 10px', fontWeight:800, color:'#059669' }}>₹{bill.totalAmount}</td></tr></tfoot>
+      </table>
+    </div>
+  );
+
+  return (
+    <div>
+      <h2 className="page-title">💳 Billing</h2>
+      <div className="tab-bar" style={{ maxWidth:320 }}>
+        <button className={`tab-btn ${tab==='search'?'active':''}`} onClick={() => setTab('search')}>🔍 Patient Lookup</button>
+        <button className={`tab-btn ${tab==='all'?'active':''}`} onClick={() => setTab('all')}>📋 All Bills</button>
+      </div>
+
+      {tab === 'search' && (
+        <div>
+          <div className="card" style={{ marginBottom:'1.25rem' }}>
+            <div className="card-title">Search Bills by Patient ID</div>
+            <form onSubmit={search} style={{ display:'flex', gap:10 }}>
+              <input className="inp" value={patientId} onChange={e=>setPatientId(e.target.value)} placeholder="Enter Patient ID (e.g. P-001)" style={{ flex:1 }} />
+              <button type="submit" className="btn btn-blue">Search →</button>
+            </form>
+          </div>
+          {bills !== null && (
+            <div>
+              {bills.length === 0
+                ? <div className="alert alert-warn">No bills found for patient ID: {patientId}</div>
+                : bills.map(b => <BillCard key={b.billId} bill={b} />)
+              }
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab === 'all' && (
+        <div className="card">
+          <div className="card-title">All Bills ({allBills.length})</div>
+          {allBills.length === 0
+            ? <div style={{ textAlign:'center', padding:'2rem', color:'#94a3b8' }}>No bills generated yet</div>
+            : allBills.map(b => <BillCard key={b.billId} bill={b} />)
+          }
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── ADMIN MODULE ──────────────────────────────────────────────────────────────
+function AdminModule() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const load = async () => { const s = await AdminService.getDashboardStats(); setStats(s); };
+    load();
+    const interval = setInterval(load, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!stats) return (
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'4rem', color:'#64748b', fontSize:'0.9rem' }}>
+      Loading dashboard…
+    </div>
+  );
+
+  const statCards = [
+    { icon:'👤', label:'Total Patients', value:stats.totalPatients, bg:'#dbeafe' },
+    { icon:'🩺', label:'Consultations', value:stats.totalEncounters, bg:'#d1fae5' },
+    { icon:'🔬', label:`Lab Tests · ${stats.pendingTests} pending`, value:stats.totalTests, bg:'#ede9fe' },
+    { icon:'₹', label:'Total Revenue', value:`₹${stats.totalRevenue}`, bg:'#fef9c3' },
+    { icon:'💊', label:`Prescriptions · ${stats.issuedPrescriptions} issued`, value:stats.totalPrescriptions, bg:'#fce7f3' },
+    { icon:'🧾', label:'Bills Generated', value:stats.totalBills, bg:'#ccfbf1' },
+  ];
+
+  return (
+    <div>
+      <h2 className="page-title">📊 Admin Dashboard</h2>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'1rem', marginBottom:'1.5rem' }}>
+        {statCards.map(s => (
+          <div key={s.label} className="stat-card">
+            <div className="stat-icon" style={{ background:s.bg }}>{s.icon}</div>
+            <div>
+              <div className="stat-value">{s.value}</div>
+              <div className="stat-label">{s.label}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="card">
+        <div className="card-title">📝 Recent Activity</div>
+        <div style={{ maxHeight:420, overflowY:'auto', display:'flex', flexDirection:'column', gap:7 }}>
+          {stats.recentActivity.length === 0
+            ? <div style={{ textAlign:'center', color:'#94a3b8', padding:'2rem' }}>No activity yet</div>
+            : stats.recentActivity.map((a, i) => (
+              <div key={a.logId||i} style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'10px 14px', background:'#f8fafc', borderRadius:9, border:'1px solid #f1f5f9' }}>
+                <div>
+                  <div style={{ fontWeight:700, fontSize:'0.85rem' }}>{a.action}</div>
+                  <div style={{ fontSize:'0.78rem', color:'#64748b', marginTop:2 }}>{a.description}</div>
+                </div>
+                <div style={{ fontSize:'0.7rem', color:'#94a3b8', whiteSpace:'nowrap', marginLeft:12 }}>{new Date(a.timestamp).toLocaleString()}</div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<HospitalManagementSystem />);
+</script>
+</body>
+</html>
