@@ -247,6 +247,22 @@ app.post('/api/doctors', async (req, res) => {
   }
 });
 
+app.put('/api/doctors/:doctorId', async (req, res) => {
+  try {
+    const { name, specialization, phone, email, qualification } = req.body;
+    const doctor = await Doctor.findOneAndUpdate(
+      { doctorId: req.params.doctorId },
+      { name, specialization, phone, email, qualification },
+      { new: true, select: '-passwordHash' }
+    );
+    if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
+    await logActivity('Doctor Updated', `Doctor ${doctor.doctorId} - ${doctor.name} updated`);
+    res.json(doctor);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update doctor', details: e.message });
+  }
+});
+
 // ─── PATIENT ROUTES ───────────────────────────────────────────────────────────
 
 app.get('/api/patients', async (req, res) => {
