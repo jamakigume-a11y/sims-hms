@@ -1,2633 +1,561 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMS Hospital — HMS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --navy: #0a1628;
-            --blue: #1e40af;
-            --blue-light: #3b82f6;
-            --accent: #06b6d4;
-            --surface: #f8fafc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --text: #0f172a;
-            --muted: #64748b;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: 'DM Sans', sans-serif;
-            background: var(--surface);
-            color: var(--text);
-            -webkit-font-smoothing: antialiased;
-        }
-
-        h1, h2, h3 { font-family: 'DM Serif Display', serif; }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        .hms-header {
-            background: var(--navy);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 0 2rem;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .hms-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: white;
-        }
-
-        .hms-logo-mark {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--blue-light), var(--accent));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .hms-logo-text {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.2rem;
-            letter-spacing: -0.3px;
-            color: white;
-        }
-
-        .hms-logo-sub {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.45);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            margin-top: 1px;
-        }
-
-        .hms-user-chip {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 99px;
-            padding: 6px 12px 6px 6px;
-        }
-
-        .hms-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--blue-light), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: white;
-        }
-
-        .hms-user-name {
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: white;
-        }
-
-        .hms-user-role {
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.5);
-        }
-
-        .hms-logout {
-            background: rgba(239,68,68,0.15);
-            border: 1px solid rgba(239,68,68,0.3);
-            color: #fca5a5;
-            border-radius: 8px;
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-        .hms-logout:hover { background: rgba(239,68,68,0.3); color: white; }
-
-        .hms-nav {
-            background: white;
-            border-bottom: 1px solid var(--border);
-            padding: 0 2rem;
-            display: flex;
-            gap: 2px;
-            overflow-x: auto;
-        }
-
-        .hms-nav-btn {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 14px 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--muted);
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-            font-family: 'DM Sans', sans-serif;
-        }
-        .hms-nav-btn:hover:not(:disabled) { color: var(--blue); background: #eff6ff; }
-        .hms-nav-btn.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
-        .hms-nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .hms-nav-icon { font-size: 15px; }
-
-        .hms-main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
-
-        .hms-page-title {
-            font-family: 'DM Serif Display', serif;
-            font-size: 1.75rem;
-            color: var(--navy);
-            margin: 0 0 1.5rem 0;
-        }
-
-        .hms-card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-        }
-
-        .hms-card-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--muted);
-            margin: 0 0 1.25rem 0;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .hms-input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 9px;
-            font-size: 0.875rem;
-            font-family: 'DM Sans', sans-serif;
-            color: var(--text);
-            background: #fafbfc;
-            transition: all 0.2s;
-            outline: none;
-        }
-        .hms-input:focus { border-color: var(--blue-light); background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
-
-        .hms-label {
-            display: block;
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 6px;
-        }
-
-        .hms-btn {
-            padding: 10px 20px;
-            border-radius: 9px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        .hms-btn-primary {
-            background: var(--blue);
-            color: white;
-            width: 100%;
-            padding: 12px;
-            font-size: 0.9rem;
-        }
-        .hms-btn-primary:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(30,64,175,0.3); }
-        .hms-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-        .hms-btn-success {
-            background: #059669;
-            color: white;
-            width: 100%;
-            padding: 12px;
-            font-size: 0.9rem;
-        }
-        .hms-btn-success:hover:not(:disabled) { background: #047857; transform: translateY(-1px); }
-        .hms-btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .hms-tab-bar {
-            display: flex;
-            gap: 4px;
-            background: #f1f5f9;
-            border-radius: 10px;
-            padding: 4px;
-            margin-bottom: 1.5rem;
-        }
-        .hms-tab {
-            flex: 1;
-            padding: 8px 16px;
-            border-radius: 7px;
-            border: none;
-            background: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--muted);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: 'DM Sans', sans-serif;
-        }
-        .hms-tab.active { background: white; color: var(--blue); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-
-        .hms-patient-card {
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1rem 1.25rem;
-            background: white;
-            margin-bottom: 10px;
-            transition: all 0.2s;
-        }
-        .hms-patient-card:hover { border-color: var(--blue-light); box-shadow: 0 2px 8px rgba(59,130,246,0.1); }
-
-        .hms-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 99px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-        .hms-badge-blue { background: #dbeafe; color: #1d4ed8; }
-        .hms-badge-green { background: #d1fae5; color: #047857; }
-        .hms-badge-orange { background: #fed7aa; color: #c2410c; }
-        .hms-badge-red { background: #fee2e2; color: #b91c1c; }
-        .hms-badge-purple { background: #ede9fe; color: #6d28d9; }
-
-        .hms-alert {
-            padding: 12px 16px;
-            border-radius: 9px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-        .hms-alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
-        .hms-alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; }
-
-        .hms-stat-card {
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.25rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .hms-stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            flex-shrink: 0;
-        }
-        .hms-stat-value { font-size: 1.75rem; font-weight: 800; color: var(--navy); line-height: 1; }
-        .hms-stat-label { font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-top: 3px; }
-
-        /* Login Page */
-        .login-wrap {
-            min-height: 100vh;
-            display: flex;
-            background: var(--navy);
-        }
-        .login-left {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 3rem;
-            background: linear-gradient(135deg, #0a1628 0%, #1e3a5f 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        .login-left::before {
-            content: '';
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
-            top: -100px;
-            right: -100px;
-        }
-        .login-left::after {
-            content: '';
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%);
-            bottom: -80px;
-            left: -80px;
-        }
-        .login-right {
-            width: 480px;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 3rem;
-        }
-        @media (max-width: 768px) {
-            .login-left { display: none; }
-            .login-right { width: 100%; }
-        }
-
-        .login-brand-icon {
-            width: 72px;
-            height: 72px;
-            background: linear-gradient(135deg, #3b82f6, #06b6d4);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 32px rgba(59,130,246,0.4);
-        }
-        .login-tagline {
-            font-family: 'DM Serif Display', serif;
-            font-size: 2.2rem;
-            color: white;
-            line-height: 1.2;
-            margin-bottom: 1rem;
-        }
-        .login-desc {
-            color: rgba(255,255,255,0.5);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            max-width: 320px;
-        }
-        .login-features {
-            margin-top: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .login-feature {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: rgba(255,255,255,0.6);
-            font-size: 0.85rem;
-        }
-        .login-feature-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--accent);
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .footer-bar {
-            background: var(--navy);
-            padding: 1rem 2rem;
-            text-align: center;
-            font-size: 0.78rem;
-            color: rgba(255,255,255,0.3);
-            border-top: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-        .form-row { margin-bottom: 1rem; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-in { animation: fadeIn 0.3s ease; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-
-        // ============================================
-        // AUTHENTICATION & AUTHORIZATION
-        // ============================================
-        
-        const USERS = {}; // No hardcoded passwords — all auth goes to backend
-
-        class AuthService {
-            static currentUser = null;
-
-            static async login(username, password) {
-                const trimmedUsername = username.trim();
-                const trimmedPassword = password.trim();
-                
-                // Try staff login first
-                try {
-                    const res = await fetch(`${API_URL}/auth/staff-login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword })
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        this.currentUser = data.user;
-                        sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-                        return { success: true, user: this.currentUser };
-                    }
-                } catch (e) {}
-
-                // Try doctor login
-                try {
-                    const res = await fetch(`${API_URL}/auth/doctor-login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: trimmedUsername, password: trimmedPassword })
-                    });
-                    if (res.ok) {
-                        const data = await res.json();
-                        this.currentUser = data.user;
-                        sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-                        return { success: true, user: this.currentUser };
-                    }
-                } catch (e) {}
-                
-                return { success: false, error: 'Invalid username or password' };
-            }
-
-            static logout() {
-                this.currentUser = null;
-                sessionStorage.removeItem('currentUser');
-            }
-
-            static isAuthenticated() {
-                if (this.currentUser) return true;
-                const stored = sessionStorage.getItem('currentUser');
-                if (stored) {
-                    try {
-                        this.currentUser = JSON.parse(stored);
-                        return true;
-                    } catch (e) {
-                        return false;
-                    }
-                }
-                return false;
-            }
-
-            static getCurrentUser() {
-                if (!this.currentUser) {
-                    const stored = sessionStorage.getItem('currentUser');
-                    if (stored) {
-                        try {
-                            this.currentUser = JSON.parse(stored);
-                        } catch (e) {
-                            this.currentUser = null;
-                        }
-                    }
-                }
-                return this.currentUser;
-            }
-
-            static hasAccess(role) {
-                const user = this.getCurrentUser();
-                if (!user) return false;
-                // Admin has access to all modules
-                if (user.role === 'admin') return true;
-                return user.role === role;
-            }
-        }
-
-        // ============================================
-        // API LAYER — Real MongoDB backend via Render
-        // LESSON: cache:'no-store' on every fetch — never stale data
-        // LESSON: always refetch after write — DB is single source of truth
-        // ============================================
-
-        // LESSON: auto-detect localhost vs production
-        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-          ? 'http://localhost:3000/api'
-          : 'https://sims-hms.onrender.com/api';
-
-        // LESSON: ping server on load + every 10 mins to prevent cold-start delay
-        async function pingServer() {
-          try {
-            await fetch(`${API_URL}/health`, { cache: 'no-store' });
-            console.log('✓ HMS Backend is awake');
-          } catch (e) {
-            console.warn('⚠ Backend sleeping, waking up...');
-          }
-        }
-        pingServer();
-        setInterval(pingServer, 10 * 60 * 1000);
-
-        // ============================================
-        // SERVICE LAYER — All calls go to MongoDB via Render API
-        // LESSON: cache:'no-store' on every GET
-        // LESSON: after every POST/PUT, caller re-fetches fresh data
-        // ============================================
-
-        class DoctorManagementService {
-            static async registerDoctor(doctorData) {
-                const res = await fetch(`${API_URL}/doctors`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(doctorData)
-                });
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Failed to register doctor'); }
-                return await res.json();
-            }
-
-            static async getAllDoctors() {
-                const res = await fetch(`${API_URL}/doctors`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Failed to fetch doctors');
-                return await res.json();
-            }
-
-            static async getDoctor(doctorId) {
-                const doctors = await this.getAllDoctors();
-                return doctors.find(d => d.doctorId === doctorId) || null;
-            }
-        }
-
-        class PatientService {
-            static async registerPatient(patientData) {
-                const res = await fetch(`${API_URL}/patients`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(patientData)
-                });
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Failed to register patient'); }
-                return await res.json(); // returns { patient, bill }
-            }
-
-            static async getAllPatients() {
-                const res = await fetch(`${API_URL}/patients`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Failed to fetch patients');
-                return await res.json();
-            }
-
-            static async getPatient(patientId) {
-                const res = await fetch(`${API_URL}/patients/${patientId}`, { cache: 'no-store' });
-                if (!res.ok) return null;
-                return await res.json();
-            }
-        }
-
-        class DoctorService {
-            static async createEncounter(encounterData) {
-                const res = await fetch(`${API_URL}/encounters`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(encounterData)
-                });
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Failed to create encounter'); }
-                return await res.json();
-            }
-
-            static async orderLabTests(encounterId, patientId, tests) {
-                const res = await fetch(`${API_URL}/labtests/bulk`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ encounterId, patientId, tests })
-                });
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Failed to order lab tests'); }
-                return await res.json();
-            }
-
-            static async createPrescription(prescriptionData) {
-                const res = await fetch(`${API_URL}/prescriptions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(prescriptionData)
-                });
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Failed to create prescription'); }
-                return await res.json();
-            }
-
-            static async getEncountersByPatient(patientId) {
-                const res = await fetch(`${API_URL}/encounters/patient/${patientId}`, { cache: 'no-store' });
-                if (!res.ok) return [];
-                return await res.json();
-            }
-
-            static async getLabTestsByEncounter(encounterId) {
-                const res = await fetch(`${API_URL}/labtests/encounter/${encounterId}`, { cache: 'no-store' });
-                if (!res.ok) return [];
-                return await res.json();
-            }
-        }
-
-        class LabService {
-            static async getPendingTests() {
-                const res = await fetch(`${API_URL}/labtests?status=PENDING`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Failed to fetch pending tests');
-                return await res.json();
-            }
-
-            static async getAllTests() {
-                const res = await fetch(`${API_URL}/labtests`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Failed to fetch tests');
-                return await res.json();
-            }
-
-            static async updateTestResult(testId, result) {
-                const res = await fetch(`${API_URL}/labtests/${testId}/result`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ result })
-                });
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Failed to update result'); }
-                return await res.json();
-            }
-        }
-
-        class PharmacyService {
-            static async getPendingPrescriptions() {
-                const res = await fetch(`${API_URL}/prescriptions?status=PENDING`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Failed to fetch prescriptions');
-                return await res.json();
-            }
-
-            static async issueMedicines(prescriptionId, medicines) {
-                const res = await fetch(`${API_URL}/prescriptions/${prescriptionId}/issue`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ medicines })
-                });
-                if (!res.ok) { const err = await res.json(); throw new Error(err.error || 'Failed to issue medicines'); }
-                return await res.json(); // returns { prescription, bill }
-            }
-        }
-
-        class BillingService {
-            static async getBillsByPatient(patientId) {
-                const res = await fetch(`${API_URL}/bills/patient/${patientId}`, { cache: 'no-store' });
-                if (!res.ok) return [];
-                return await res.json();
-            }
-
-            static async getAllBills() {
-                const res = await fetch(`${API_URL}/bills`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Failed to fetch bills');
-                return await res.json();
-            }
-        }
-
-        class AdminService {
-            static async getDashboardStats() {
-                const res = await fetch(`${API_URL}/stats`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Failed to fetch stats');
-                return await res.json();
-            }
-        }
-
-        // ============================================
-        // UI COMPONENTS
-        // ============================================
-
-        // Login Component
-        function LoginPage({ onLoginSuccess }) {
-            const [username, setUsername] = useState('');
-            const [password, setPassword] = useState('');
-            const [error, setError] = useState('');
-            const [loading, setLoading] = useState(false);
-            const [showPassword, setShowPassword] = useState(false);
-
-            const handleLogin = async (e) => {
-                e.preventDefault();
-                setError('');
-                setLoading(true);
-
-                setLoading(true);
-                try {
-                    const result = await AuthService.login(username, password);
-                    if (result.success) {
-                        onLoginSuccess(result.user);
-                    } else {
-                        setError(result.error);
-                        setPassword('');
-                    }
-                } catch (e) {
-                    setError('Connection error. Please try again.');
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            const fillCredentials = (user, pass) => {
-                setUsername(user);
-                setPassword(pass);
-                setError('');
-            };
-
-            return (
-                <div className="login-wrap">
-                    {/* Left panel */}
-                    <div className="login-left">
-                        <div style={{position:'relative', zIndex:1, width:'100%', maxWidth:'360px'}}>
-                            <div className="login-brand-icon">🏥</div>
-                            <div className="login-tagline">SIMS Hospital<br/>Management System</div>
-                            <div className="login-desc">A complete healthcare management platform for patient registration, diagnostics, pharmacy, and billing.</div>
-                            <div className="login-features">
-                                {['Patient Registration & Management','Doctor Consultation Portal','Lab & Diagnostics Tracking','Pharmacy & Billing System'].map(f => (
-                                    <div key={f} className="login-feature"><div className="login-feature-dot"></div>{f}</div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right panel */}
-                    <div className="login-right">
-                        <div style={{marginBottom:'2rem'}}>
-                            <div style={{fontSize:'1.6rem', fontFamily:'DM Serif Display, serif', color:'#0a1628', marginBottom:'6px'}}>Welcome back</div>
-                            <div style={{fontSize:'0.875rem', color:'#64748b'}}>Sign in to your HMS account</div>
-                        </div>
-
-                        <form onSubmit={handleLogin} style={{display:'flex', flexDirection:'column', gap:'1rem'}}>
-                            <div>
-                                <label className="hms-label">Username</label>
-                                <input
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    className="hms-input"
-                                    placeholder="Enter your username"
-                                    required
-                                    autoFocus
-                                />
-                            </div>
-
-                            <div>
-                                <label className="hms-label">Password</label>
-                                <div style={{position:'relative'}}>
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="hms-input"
-                                        placeholder="Enter your password"
-                                        style={{paddingRight:'44px'}}
-                                        required
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        style={{position:'absolute', right:'12px', top:'50%', transform:'translateY(-50%)', background:'none', border:'none', cursor:'pointer', fontSize:'16px', color:'#94a3b8'}}
-                                    >
-                                        {showPassword ? '🙈' : '👁️'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            {error && (
-                                <div className="hms-alert hms-alert-error">⚠ {error}</div>
-                            )}
-
-                            <button type="submit" disabled={loading} className="hms-btn hms-btn-primary" style={{marginTop:'0.5rem'}}>
-                                {loading ? 'Signing in...' : 'Sign In →'}
-                            </button>
-                        </form>
-
-                        <div style={{marginTop:'2rem', padding:'1rem', background:'#f8fafc', borderRadius:'10px', border:'1px solid #e2e8f0'}}>
-                            <div style={{fontSize:'0.75rem', fontWeight:'700', color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.05em', marginBottom:'10px'}}>Available Roles</div>
-                            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'6px'}}>
-                                {[['📋','reception'],['⚕️','doctor'],['🔬','lab'],['💊','pharmacy'],['💳','billing'],['📊','admin']].map(([icon, role]) => (
-                                    <div key={role} style={{background:'white', border:'1px solid #e2e8f0', borderRadius:'7px', padding:'6px 10px', fontSize:'0.75rem', color:'#475569', fontWeight:'500'}}>
-                                        {icon} {role}
-                                    </div>
-                                ))}
-                            </div>
-                            <div style={{fontSize:'0.72rem', color:'#94a3b8', marginTop:'10px'}}>Contact your administrator for credentials</div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // Main App Component
-        function HospitalManagementSystem() {
-            const [currentModule, setCurrentModule] = useState('reception');
-            const [dbInitialized, setDbInitialized] = useState(false);
-            const [isAuthenticated, setIsAuthenticated] = useState(false);
-            const [currentUser, setCurrentUser] = useState(null);
-
-            useEffect(() => {
-                // Check if user is already logged in
-                if (AuthService.isAuthenticated()) {
-                    setIsAuthenticated(true);
-                    setCurrentUser(AuthService.getCurrentUser());
-                }
-
-                // LESSON: ping API on load instead of IndexedDB init
-                // App shows even if Render is sleeping — it wakes up within 30s
-                fetch(`${API_URL}/health`, { cache: 'no-store' })
-                    .then(() => setDbInitialized(true))
-                    .catch(() => setDbInitialized(true)); // show app regardless
-            }, []);
-
-            const handleLoginSuccess = (user) => {
-                setIsAuthenticated(true);
-                setCurrentUser(user);
-                setCurrentModule(user.role);
-            };
-
-            const handleLogout = () => {
-                if (confirm('Are you sure you want to logout?')) {
-                    AuthService.logout();
-                    setIsAuthenticated(false);
-                    setCurrentUser(null);
-                    setCurrentModule('reception');
-                }
-            };
-
-            if (!dbInitialized) {
-                return (
-                    <div style={{minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#0a1628'}}>
-                        <div style={{textAlign:'center'}}>
-                            <div style={{fontSize:'3rem', marginBottom:'1rem'}}>🏥</div>
-                            <div style={{fontFamily:'DM Serif Display, serif', fontSize:'1.5rem', color:'white', marginBottom:'8px'}}>SIMS Hospital</div>
-                            <div style={{color:'rgba(255,255,255,0.4)', fontSize:'0.875rem'}}>Connecting to server...</div>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (!isAuthenticated) {
-                return <LoginPage onLoginSuccess={handleLoginSuccess} />;
-            }
-
-            const canAccessModule = (module) => {
-                if (currentUser.role === 'admin') return true;
-                return currentUser.role === module;
-            };
-
-            const handleModuleChange = (module) => {
-                if (!canAccessModule(module)) {
-                    alert(`Access Denied: You don't have permission to access ${module} module.`);
-                    return;
-                }
-                setCurrentModule(module);
-            };
-
-            return (
-                <div style={{minHeight:'100vh', display:'flex', flexDirection:'column', background:'#f8fafc'}}>
-                    {/* Header */}
-                    <header className="hms-header">
-                        <div className="hms-logo">
-                            <div className="hms-logo-mark">🏥</div>
-                            <div>
-                                <div className="hms-logo-text">SIMS Hospital</div>
-                                <div className="hms-logo-sub">Hospital Management System</div>
-                            </div>
-                        </div>
-                        <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
-                            <div className="hms-user-chip">
-                                <div className="hms-avatar">{currentUser.name.charAt(0).toUpperCase()}</div>
-                                <div>
-                                    <div className="hms-user-name">{currentUser.name}</div>
-                                    <div className="hms-user-role">{currentUser.role}</div>
-                                </div>
-                            </div>
-                            <button onClick={handleLogout} className="hms-logout">Sign Out</button>
-                        </div>
-                    </header>
-
-                    {/* Navigation */}
-                    <nav className="hms-nav">
-                        {[
-                            { id: 'reception', label: 'Reception', icon: '📋' },
-                            { id: 'doctor', label: 'Doctor', icon: '⚕️' },
-                            { id: 'lab', label: 'Laboratory', icon: '🔬' },
-                            { id: 'pharmacy', label: 'Pharmacy', icon: '💊' },
-                            { id: 'billing', label: 'Billing', icon: '💳' },
-                            { id: 'admin', label: 'Admin', icon: '📊' }
-                        ].map(module => {
-                            const hasAccess = canAccessModule(module.id);
-                            return (
-                                <button
-                                    key={module.id}
-                                    onClick={() => handleModuleChange(module.id)}
-                                    disabled={!hasAccess}
-                                    className={`hms-nav-btn ${currentModule === module.id ? 'active' : ''}`}
-                                >
-                                    <span className="hms-nav-icon">{module.icon}</span>
-                                    {module.label}
-                                    {!hasAccess && <span style={{fontSize:'11px', opacity:0.5}}>🔒</span>}
-                                </button>
-                            );
-                        })}
-                    </nav>
-
-                    {/* Main Content */}
-                    <main className="hms-main" style={{flex:1}}>
-                        <div className="animate-in">
-                            {currentModule === 'reception' && <ReceptionModule />}
-                            {currentModule === 'doctor' && <DoctorModule />}
-                            {currentModule === 'lab' && <LabModule />}
-                            {currentModule === 'pharmacy' && <PharmacyModule />}
-                            {currentModule === 'billing' && <BillingModule />}
-                            {currentModule === 'admin' && <AdminModule />}
-                        </div>
-                    </main>
-
-                    <div className="footer-bar">
-                        SIMS Hospital Management System · MongoDB Atlas + Render + GitHub Pages
-                    </div>
-                </div>
-            );
-        }
-
-        // ============================================
-        // RECEPTION MODULE (ENHANCED WITH DOCTOR REGISTRATION)
-        // ============================================
-        function ReceptionModule() {
-            const [activeTab, setActiveTab] = useState('patient'); // 'patient' or 'doctor'
-            
-            // Patient Registration State
-            const [patientForm, setPatientForm] = useState({
-                firstName: '',
-                lastName: '',
-                age: '',
-                gender: '',
-                phone: '',
-                address: '',
-                chiefComplaint: '',
-                assignedDoctorId: ''
-            });
-            
-            // Doctor Registration State
-            const [doctorForm, setDoctorForm] = useState({
-                name: '',
-                specialization: '',
-                phone: '',
-                email: '',
-                qualification: '',
-                password: ''
-            });
-            
-            const [message, setMessage] = useState(null);
-            const [patients, setPatients] = useState([]);
-            const [doctors, setDoctors] = useState([]);
-            const [loading, setLoading] = useState(false);
-
-            const specializations = [
-                'Cardiology',
-                'Neurology',
-                'Orthopedics',
-                'Pediatrics',
-                'General Medicine',
-                'Dermatology',
-                'ENT',
-                'Psychiatry',
-                'Gynecology',
-                'Gastroenterology'
-            ];
-
-            const chiefComplaints = [
-                'Fever',
-                'Chest Pain',
-                'Headache',
-                'Abdominal Pain',
-                'Respiratory Issues',
-                'Joint Pain',
-                'Skin Problems',
-                'Mental Health',
-                'Pregnancy Related',
-                'Digestive Issues',
-                'General Checkup',
-                'Other'
-            ];
-
-            useEffect(() => {
-                loadData();
-            }, []);
-
-            const loadData = async () => {
-                const allPatients = await PatientService.getAllPatients();
-                const allDoctors = await DoctorManagementService.getAllDoctors();
-                setPatients(allPatients.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt)));
-                setDoctors(allDoctors.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt)));
-            };
-
-            const handlePatientSubmit = async (e) => {
-                e.preventDefault();
-                
-                if (!patientForm.firstName || !patientForm.age || !patientForm.gender || !patientForm.chiefComplaint) {
-                    setMessage({ type: 'error', text: 'Please fill all required fields (First Name, Age, Gender, Chief Complaint)' });
-                    return;
-                }
-
-                if (!patientForm.assignedDoctorId) {
-                    setMessage({ type: 'error', text: 'Please choose a doctor for the patient' });
-                    return;
-                }
-
-                setLoading(true);
-                try {
-                    const result = await PatientService.registerPatient(patientForm);
-                    const assignedDoctor = doctors.find(d => d.doctorId === patientForm.assignedDoctorId);
-                    setMessage({ 
-                        type: 'success', 
-                        text: `✅ Patient registered successfully!\n\nPatient ID: ${result.patient.patientId}\nChosen Doctor: ${assignedDoctor ? assignedDoctor.name : 'N/A'}\nRegistration Bill: ${result.bill.billId} - ₹${result.bill.totalAmount}` 
-                    });
-                    setPatientForm({
-                        firstName: '',
-                        lastName: '',
-                        age: '',
-                        gender: '',
-                        phone: '',
-                        address: '',
-                        chiefComplaint: '',
-                        assignedDoctorId: ''
-                    });
-                    await loadData();
-                } catch (error) {
-                    setMessage({ type: 'error', text: '❌ Registration failed: ' + error.message });
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            const handleDoctorSubmit = async (e) => {
-                e.preventDefault();
-                
-                if (!doctorForm.name || !doctorForm.specialization) {
-                    setMessage({ type: 'error', text: 'Please fill all required fields (Name, Specialization)' });
-                    return;
-                }
-                if (!doctorForm.password || doctorForm.password.length < 6) {
-                    setMessage({ type: 'error', text: 'Password must be at least 6 characters' });
-                    return;
-                }
-
-                setLoading(true);
-                try {
-                    const result = await DoctorManagementService.registerDoctor(doctorForm);
-                    setMessage({ 
-                        type: 'success', 
-                        text: `✅ Doctor registered successfully!\n\nDoctor Login ID: ${result.doctorId}\nName: ${result.name}\nSpecialization: ${result.specialization}\n\n⚠️ Save this Login ID — the doctor will use it to log in!` 
-                    });
-                    setDoctorForm({
-                        name: '',
-                        specialization: '',
-                        phone: '',
-                        email: '',
-                        qualification: '',
-                        password: ''
-                    });
-                    await loadData();
-                } catch (error) {
-                    setMessage({ type: 'error', text: '❌ Doctor registration failed: ' + error.message });
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return (
-                <div className="max-w-7xl mx-auto">
-                    <h2 className="hms-page-title">Reception Desk</h2>
-
-                    {message && (
-                        <div className={`hms-alert ${message.type === 'success' ? 'hms-alert-success' : 'hms-alert-error'}`}>
-                            <div className="whitespace-pre-line">{message.text}</div>
-                        </div>
-                    )}
-
-                    {/* Tabs */}
-                    <div className="hms-tab-bar" style={{maxWidth:'320px'}}>
-                        <button onClick={() => {setActiveTab('patient'); setMessage(null);}} className={`hms-tab ${activeTab === 'patient' ? 'active' : ''}`}>
-                            👤 Register Patient
-                        </button>
-                        <button onClick={() => {setActiveTab('doctor'); setMessage(null);}} className={`hms-tab ${activeTab === 'doctor' ? 'active' : ''}`}>
-                            ⚕️ Register Doctor
-                        </button>
-                    </div>
-
-                    {activeTab === 'patient' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Patient Registration Form */}
-                            <div className="hms-card">
-                                <h3 className="hms-card-title">Register New Patient</h3>
-                                {doctors.length === 0 ? (
-                                    <div className="text-center py-8 bg-yellow-50 rounded-lg border border-yellow-200">
-                                        <div className="text-4xl mb-2">⚠️</div>
-                                        <div className="text-yellow-800 font-medium">No doctors registered yet!</div>
-                                        <div className="text-sm text-yellow-700 mt-2">Please register doctors first in the "Register Doctor" tab</div>
-                                    </div>
-                                ) : (
-                                    <form onSubmit={handlePatientSubmit} className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="hms-label">
-                                                    First Name <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={patientForm.firstName}
-                                                    onChange={(e) => setPatientForm({...patientForm, firstName: e.target.value})}
-                                                    className="hms-input"
-                                                    required
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="hms-label">
-                                                    Last Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={patientForm.lastName}
-                                                    onChange={(e) => setPatientForm({...patientForm, lastName: e.target.value})}
-                                                    className="hms-input"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="hms-label">
-                                                    Age <span className="text-red-500">*</span>
-                                                </label>
-                                                <input
-                                                    type="number"
-                                                    min="0"
-                                                    max="150"
-                                                    value={patientForm.age}
-                                                    onChange={(e) => setPatientForm({...patientForm, age: e.target.value})}
-                                                    className="hms-input"
-                                                    required
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="hms-label">
-                                                    Gender <span className="text-red-500">*</span>
-                                                </label>
-                                                <select
-                                                    value={patientForm.gender}
-                                                    onChange={(e) => setPatientForm({...patientForm, gender: e.target.value})}
-                                                    className="hms-input"
-                                                    required
-                                                >
-                                                    <option value="">Select Gender</option>
-                                                    <option value="Male">Male</option>
-                                                    <option value="Female">Female</option>
-                                                    <option value="Other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="hms-label">
-                                                Chief Complaint / Disease <span className="text-red-500">*</span>
-                                            </label>
-                                            <select
-                                                value={patientForm.chiefComplaint}
-                                                onChange={(e) => setPatientForm({...patientForm, chiefComplaint: e.target.value})}
-                                                className="hms-input"
-                                                required
-                                            >
-                                                <option value="">-- Select Chief Complaint --</option>
-                                                {chiefComplaints.map(complaint => (
-                                                    <option key={complaint} value={complaint}>{complaint}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label className="hms-label">
-                                                Choose Your Doctor <span className="text-red-500">*</span>
-                                            </label>
-                                            <div className="text-xs text-gray-500 mb-2">
-                                                Patient/Family can select their preferred doctor
-                                            </div>
-                                            
-                                            {/* Available Doctors Display */}
-                                            {doctors.length > 0 && (
-                                                <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200 max-h-40 overflow-y-auto">
-                                                    <div className="text-xs font-semibold text-blue-800 mb-2">Available Doctors:</div>
-                                                    <div className="space-y-1">
-                                                        {doctors.map(doctor => (
-                                                            <div key={doctor.doctorId} className="text-xs text-gray-700 flex justify-between">
-                                                                <span className="font-medium">Dr. {doctor.name}</span>
-                                                                <span className="text-blue-600">{doctor.specialization}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            
-                                            <select
-                                                value={patientForm.assignedDoctorId}
-                                                onChange={(e) => setPatientForm({...patientForm, assignedDoctorId: e.target.value})}
-                                                className="hms-input"
-                                                required
-                                            >
-                                                <option value="">-- Choose a Doctor --</option>
-                                                {doctors.map(doctor => (
-                                                    <option key={doctor.doctorId} value={doctor.doctorId}>
-                                                        Dr. {doctor.name} ({doctor.specialization})
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <div className="mt-2 text-xs text-blue-600">
-                                                💡 Tip: Select doctor based on your medical condition
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="hms-label">
-                                                Phone Number
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                value={patientForm.phone}
-                                                onChange={(e) => setPatientForm({...patientForm, phone: e.target.value})}
-                                                className="hms-input"
-                                                placeholder="+91 98765 43210"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="hms-label">
-                                                Address
-                                            </label>
-                                            <textarea
-                                                value={patientForm.address}
-                                                onChange={(e) => setPatientForm({...patientForm, address: e.target.value})}
-                                                className="hms-input"
-                                                rows="2"
-                                                placeholder="Enter full address"
-                                            />
-                                        </div>
-
-                                        <button
-                                            type="submit"
-                                            disabled={loading}
-                                            className="hms-btn hms-btn-primary"
-                                        >
-                                            {loading ? 'Registering...' : '✅ Register Patient'}
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
-
-                            {/* Registered Patients List */}
-                            <div className="hms-card">
-                                <h3 className="hms-card-title">
-                                    Registered Patients ({patients.length})
-                                </h3>
-                                <div className="overflow-y-auto max-h-[700px]">
-                                    {patients.length === 0 ? (
-                                        <div className="text-center py-12 text-gray-500">
-                                            <div className="text-4xl mb-2">👥</div>
-                                            <div>No patients registered yet</div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {patients.map(patient => {
-                                                const assignedDoctor = doctors.find(d => d.doctorId === patient.assignedDoctorId);
-                                                return (
-                                                    <div key={patient.patientId} className="hms-patient-card">
-                                                        <div className="font-semibold text-lg text-gray-800">
-                                                            {patient.firstName} {patient.lastName}
-                                                        </div>
-                                                        <div className="text-sm text-blue-600 font-mono">{patient.patientId}</div>
-                                                        <div className="text-sm text-gray-600 mt-1">
-                                                            Age: {patient.age} | {patient.gender}
-                                                        </div>
-                                                        {patient.chiefComplaint && (
-                                                            <div className="text-sm text-orange-600 mt-1">
-                                                                <span className="font-medium">Chief Complaint:</span> {patient.chiefComplaint}
-                                                            </div>
-                                                        )}
-                                                        {assignedDoctor && (
-                                                            <div className="text-sm text-green-600 mt-1">
-                                                                <span className="font-medium">Chosen Doctor:</span> Dr. {assignedDoctor.name} ({assignedDoctor.specialization})
-                                                            </div>
-                                                        )}
-                                                        {patient.phone && (
-                                                            <div className="text-sm text-gray-600 mt-1">📞 {patient.phone}</div>
-                                                        )}
-                                                        <div className="text-xs text-gray-400 mt-1">
-                                                            Registered: {new Date(patient.registeredAt).toLocaleString()}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'doctor' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            {/* Doctor Registration Form */}
-                            <div className="hms-card">
-                                <h3 className="hms-card-title">Register New Doctor</h3>
-                                <form onSubmit={handleDoctorSubmit} className="space-y-4">
-                                    <div>
-                                        <label className="hms-label">
-                                            Doctor Name <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={doctorForm.name}
-                                            onChange={(e) => setDoctorForm({...doctorForm, name: e.target.value})}
-                                            className="hms-input"
-                                            placeholder="Enter doctor's full name"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="hms-label">
-                                            Department / Specialization <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={doctorForm.specialization}
-                                            onChange={(e) => setDoctorForm({...doctorForm, specialization: e.target.value})}
-                                            className="hms-input"
-                                            placeholder="e.g. Cardiology, Neurology, General Medicine"
-                                            required
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="hms-label">
-                                            Qualification
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={doctorForm.qualification}
-                                            onChange={(e) => setDoctorForm({...doctorForm, qualification: e.target.value})}
-                                            className="hms-input"
-                                            placeholder="e.g., MBBS, MD"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="hms-label">
-                                            Phone Number
-                                        </label>
-                                        <input
-                                            type="tel"
-                                            value={doctorForm.phone}
-                                            onChange={(e) => setDoctorForm({...doctorForm, phone: e.target.value})}
-                                            className="hms-input"
-                                            placeholder="+91 98765 43210"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="hms-label">
-                                            Email Address
-                                        </label>
-                                        <input
-                                            type="email"
-                                            value={doctorForm.email}
-                                            onChange={(e) => setDoctorForm({...doctorForm, email: e.target.value})}
-                                            className="hms-input"
-                                            placeholder="doctor@hospital.com"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="hms-label">
-                                            Login Password <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="password"
-                                            value={doctorForm.password}
-                                            onChange={(e) => setDoctorForm({...doctorForm, password: e.target.value})}
-                                            className="hms-input"
-                                            placeholder="Set doctor's login password (min 6 chars)"
-                                            required
-                                        />
-                                        <div className="text-xs text-gray-500 mt-1">Doctor will use their Doctor ID + this password to log in</div>
-                                    </div>
-
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="hms-btn hms-btn-success"
-                                    >
-                                        {loading ? 'Registering...' : '✅ Register Doctor'}
-                                    </button>
-                                </form>
-                            </div>
-
-                            {/* Registered Doctors List */}
-                            <div className="hms-card">
-                                <h3 className="hms-card-title">
-                                    Registered Doctors ({doctors.length})
-                                </h3>
-                                <div className="overflow-y-auto max-h-[700px]">
-                                    {doctors.length === 0 ? (
-                                        <div className="text-center py-12 text-gray-500">
-                                            <div className="text-4xl mb-2">⚕️</div>
-                                            <div>No doctors registered yet</div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {doctors.map(doctor => (
-                                                <div key={doctor.doctorId} className="border-2 border-green-200 rounded-lg p-4 hover:shadow-md transition-shadow bg-green-50">
-                                                    <div className="font-semibold text-lg text-gray-800">
-                                                        Dr. {doctor.name}
-                                                    </div>
-                                                    <div className="text-sm text-green-600 font-mono">{doctor.doctorId}</div>
-                                                    <div className="text-sm text-gray-700 mt-2">
-                                                        <span className="font-medium">Specialization:</span> {doctor.specialization}
-                                                    </div>
-                                                    {doctor.qualification && (
-                                                        <div className="text-sm text-gray-600 mt-1">
-                                                            <span className="font-medium">Qualification:</span> {doctor.qualification}
-                                                        </div>
-                                                    )}
-                                                    {doctor.phone && (
-                                                        <div className="text-sm text-gray-600 mt-1">📞 {doctor.phone}</div>
-                                                    )}
-                                                    {doctor.email && (
-                                                        <div className="text-sm text-gray-600 mt-1">📧 {doctor.email}</div>
-                                                    )}
-                                                    <div className="text-xs text-gray-400 mt-2">
-                                                        Registered: {new Date(doctor.registeredAt).toLocaleString()}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        // ============================================
-        // DOCTOR MODULE
-        // DOCTOR MODULE
-        // ============================================
-        function DoctorModule() {
-            const [step, setStep] = useState(1);
-            const [patients, setPatients] = useState([]);
-            const [selectedPatient, setSelectedPatient] = useState(null);
-            const [doctorName, setDoctorName] = useState('');
-            const [diagnosis, setDiagnosis] = useState('');
-            const [notes, setNotes] = useState('');
-            const [labTests, setLabTests] = useState([]);
-            const [medicines, setMedicines] = useState([]);
-            const [message, setMessage] = useState(null);
-            const [encounters, setEncounters] = useState([]);
-            const [selectedEncounter, setSelectedEncounter] = useState(null);
-            const [encounterTests, setEncounterTests] = useState([]);
-            const [loading, setLoading] = useState(false);
-
-            const [doctors, setDoctors] = useState([]);
-            
-            useEffect(() => {
-                loadDoctors();
-            }, [patients]);
-            
-            const loadDoctors = async () => {
-                const allDoctors = await DoctorManagementService.getAllDoctors();
-                setDoctors(allDoctors);
-            };
-            const availableTests = [
-                'Complete Blood Count (CBC)',
-                'Blood Sugar (Fasting)',
-                'Blood Sugar (PP)',
-                'Lipid Profile',
-                'Liver Function Test (LFT)',
-                'Kidney Function Test (KFT)',
-                'Thyroid Profile (T3, T4, TSH)',
-                'Urine Analysis',
-                'X-Ray Chest',
-                'ECG',
-                'Hemoglobin A1c',
-                'Vitamin D',
-                'Vitamin B12'
-            ];
-
-            useEffect(() => {
-                loadPatients();
-            }, []);
-
-            const loadPatients = async () => {
-                const allPatients = await PatientService.getAllPatients();
-                setPatients(allPatients.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt)));
-            };
-
-            const loadPatientEncounters = async (patientId) => {
-                const patientEncounters = await DoctorService.getEncountersByPatient(patientId);
-                setEncounters(patientEncounters.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-            };
-
-            const loadEncounterTests = async (encounterId) => {
-                const tests = await DoctorService.getLabTestsByEncounter(encounterId);
-                setEncounterTests(tests);
-            };
-
-            const handlePatientSelect = (patient) => {
-                setSelectedPatient(patient);
-                loadPatientEncounters(patient.patientId);
-                setStep(2);
-                setMessage(null);
-            };
-
-            const addLabTest = (testName) => {
-                if (!labTests.find(t => t.testName === testName)) {
-                    setLabTests([...labTests, { testName }]);
-                }
-            };
-
-            const removeLabTest = (testName) => {
-                setLabTests(labTests.filter(t => t.testName !== testName));
-            };
-
-            const addMedicine = () => {
-                setMedicines([...medicines, { medicineName: '', dosage: '', duration: '', quantity: 1, price: 50 }]);
-            };
-
-            const updateMedicine = (index, field, value) => {
-                const updated = [...medicines];
-                updated[index][field] = value;
-                setMedicines(updated);
-            };
-
-            const removeMedicine = (index) => {
-                setMedicines(medicines.filter((_, i) => i !== index));
-            };
-
-            const handleSubmit = async () => {
-                if (!doctorName || !diagnosis) {
-                    setMessage({ type: 'error', text: '❌ Please select doctor and enter diagnosis' });
-                    return;
-                }
-
-                if (labTests.length === 0 && medicines.length === 0) {
-                    setMessage({ type: 'error', text: '❌ Please order at least one lab test or prescribe at least one medicine' });
-                    return;
-                }
-
-                setLoading(true);
-                try {
-                    // Create encounter
-                    const encounter = await DoctorService.createEncounter({
-                        patientId: selectedPatient.patientId,
-                        doctorName,
-                        diagnosis,
-                        notes
-                    });
-
-                    // Order lab tests
-                    if (labTests.length > 0) {
-                        await DoctorService.orderLabTests(encounter.encounterId, selectedPatient.patientId, labTests);
-                    }
-
-                    // Create prescription
-                    const validMedicines = medicines.filter(m => m.medicineName && m.dosage);
-                    if (validMedicines.length > 0) {
-                        await DoctorService.createPrescription({
-                            encounterId: encounter.encounterId,
-                            patientId: selectedPatient.patientId,
-                            medicines: validMedicines
-                        });
-                    }
-
-                    setMessage({ 
-                        type: 'success', 
-                        text: `✅ Encounter created successfully!\n\n• Encounter ID: ${encounter.encounterId}\n• Lab Tests Ordered: ${labTests.length}\n• Medicines Prescribed: ${validMedicines.length}\n\nData is now available in Lab and Pharmacy modules.` 
-                    });
-
-                    // Reset form
-                    setDoctorName('');
-                    setDiagnosis('');
-                    setNotes('');
-                    setLabTests([]);
-                    setMedicines([]);
-                    setTimeout(() => {
-                        setStep(1);
-                        setSelectedPatient(null);
-                        setMessage(null);
-                    }, 3000);
-                } catch (error) {
-                    setMessage({ type: 'error', text: '❌ Failed to create encounter: ' + error.message });
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            const viewEncounter = async (encounter) => {
-                if (selectedEncounter?.encounterId === encounter.encounterId) {
-                    setSelectedEncounter(null);
-                    setEncounterTests([]);
-                } else {
-                    setSelectedEncounter(encounter);
-                    await loadEncounterTests(encounter.encounterId);
-                }
-            };
-
-            return (
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="hms-page-title">
-                        <span className="mr-3">⚕️</span>
-                        Doctor Consultation
-                    </h2>
-
-                    {message && (
-                        <div className={`mb-6 p-4 rounded-lg shadow-md ${message.type === 'success' ? 'bg-green-50 border-l-4 border-green-500 text-green-800' : 'bg-red-50 border-l-4 border-red-500 text-red-800'}`}>
-                            <div className="font-medium whitespace-pre-line">{message.text}</div>
-                        </div>
-                    )}
-
-                    {/* Step 1: Select Patient */}
-                    {step === 1 && (
-                        <div className="hms-card">
-                            <h3 className="hms-card-title">
-                                Step 1: Select Patient for Consultation
-                            </h3>
-                            {patients.length === 0 ? (
-                                <div className="text-center py-12 text-gray-500">
-                                    <div className="text-4xl mb-2">👥</div>
-                                    <div>No patients registered yet</div>
-                                    <div className="text-sm mt-2">Please register patients in Reception module first</div>
-                                </div>
-                            ) : (
-                                <div className="space-y-3">
-                                    {patients.map(patient => (
-                                        <div 
-                                            key={patient.patientId}
-                                            className="flex justify-between items-center p-4 border rounded-lg hover:shadow-md cursor-pointer transition-all hover:border-blue-400 bg-gray-50"
-                                            onClick={() => handlePatientSelect(patient)}
-                                        >
-                                            <div>
-                                                <div className="font-semibold text-lg">{patient.firstName} {patient.lastName}</div>
-                                                <div className="text-sm text-gray-600">{patient.patientId} | Age: {patient.age} | {patient.gender}</div>
-                                                {patient.phone && <div className="text-sm text-gray-500">📞 {patient.phone}</div>}
-                                            </div>
-                                            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-                                                Select →
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Step 2: Create Encounter */}
-                    {step === 2 && selectedPatient && (
-                        <div>
-                            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
-                                <div className="flex justify-between items-center">
-                                    <div>
-                                        <div className="font-semibold text-lg">Selected Patient: {selectedPatient.firstName} {selectedPatient.lastName}</div>
-                                        <div className="text-sm text-gray-600">{selectedPatient.patientId} | Age: {selectedPatient.age} | {selectedPatient.gender}</div>
-                                    </div>
-                                    <button 
-                                        onClick={() => {setStep(1); setSelectedPatient(null); setMessage(null);}}
-                                        className="px-4 py-2 bg-white border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-100 font-medium"
-                                    >
-                                        ← Change Patient
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Previous Encounters */}
-                            {encounters.length > 0 && (
-                                <div className="hms-card" style={{marginBottom:"1.5rem"}}>
-                                    <h3 className="text-lg font-semibold mb-4 text-purple-700">
-                                        📋 Previous Encounters ({encounters.length})
-                                    </h3>
-                                    <div className="space-y-3">
-                                        {encounters.map(enc => (
-                                            <div key={enc.encounterId} className="hms-patient-card">
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex-1">
-                                                        <div className="font-semibold text-blue-700">{enc.doctorName}</div>
-                                                        <div className="text-sm text-gray-700 mt-1"><strong>Diagnosis:</strong> {enc.diagnosis}</div>
-                                                        {enc.notes && <div className="text-sm text-gray-600 mt-1"><strong>Notes:</strong> {enc.notes}</div>}
-                                                        <div className="text-xs text-gray-500 mt-2">{new Date(enc.createdAt).toLocaleString()}</div>
-                                                    </div>
-                                                    <button 
-                                                        onClick={() => viewEncounter(enc)}
-                                                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium"
-                                                    >
-                                                        {selectedEncounter?.encounterId === enc.encounterId ? 'Hide Tests' : 'View Tests'}
-                                                    </button>
-                                                </div>
-                                                {selectedEncounter?.encounterId === enc.encounterId && (
-                                                    <div className="mt-4 pt-4 border-t">
-                                                        <div className="font-medium text-sm mb-2">🔬 Lab Test Results:</div>
-                                                        {encounterTests.length > 0 ? (
-                                                            <div className="space-y-2">
-                                                                {encounterTests.map(test => (
-                                                                    <div key={test.testId} className="bg-white p-3 rounded border">
-                                                                        <div className="flex justify-between items-start">
-                                                                            <div className="flex-1">
-                                                                                <div className="font-medium">{test.testName}</div>
-                                                                                <div className={`text-sm mt-1 ${test.status === 'COMPLETED' ? 'text-green-600' : 'text-orange-600'}`}>
-                                                                                    Status: {test.status}
-                                                                                </div>
-                                                                            </div>
-                                                                            {test.status === 'COMPLETED' && (
-                                                                                <div className="bg-green-50 px-3 py-1 rounded text-green-800 text-sm">
-                                                                                    ✓ Completed
-                                                                                </div>
-                                                                            )}
-                                                                        </div>
-                                                                        {test.status === 'COMPLETED' && (
-                                                                            <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
-                                                                                <div className="text-xs font-medium text-green-800">Result:</div>
-                                                                                <div className="text-sm text-green-700">{test.result}</div>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <div className="text-sm text-gray-500 bg-gray-100 p-3 rounded">No tests ordered for this encounter</div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* New Encounter Form */}
-                            <div className="hms-card">
-                                <h3 className="hms-card-title">
-                                    ➕ Create New Encounter
-                                </h3>
-                                
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Select Doctor <span className="text-red-500">*</span>
-                                        </label>
-                                        <select
-                                            value={doctorName}
-                                            onChange={(e) => setDoctorName(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            <option value="">-- Select Doctor --</option>
-                                            {doctors.map(doc => (
-                                                <option key={doc.doctorId} value={doc.name}>Dr. {doc.name} ({doc.specialization})</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Diagnosis <span className="text-red-500">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={diagnosis}
-                                            onChange={(e) => setDiagnosis(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Enter primary diagnosis"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Clinical Notes (Optional)
-                                        </label>
-                                        <textarea
-                                            value={notes}
-                                            onChange={(e) => setNotes(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            rows="3"
-                                            placeholder="Additional clinical observations, symptoms, etc."
-                                        />
-                                    </div>
-
-                                    {/* Lab Tests */}
-                                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                                        <label className="block text-sm font-medium text-purple-800 mb-3">
-                                            🔬 Order Lab Tests
-                                        </label>
-                                        <div className="flex flex-wrap gap-2 mb-3">
-                                            {availableTests.map(test => (
-                                                <button
-                                                    key={test}
-                                                    type="button"
-                                                    onClick={() => addLabTest(test)}
-                                                    disabled={labTests.find(t => t.testName === test)}
-                                                    className={`px-3 py-2 text-sm rounded-lg font-medium transition-all ${
-                                                        labTests.find(t => t.testName === test)
-                                                            ? 'bg-green-500 text-white cursor-not-allowed'
-                                                            : 'bg-white border border-purple-300 text-purple-700 hover:bg-purple-100'
-                                                    }`}
-                                                >
-                                                    {labTests.find(t => t.testName === test) ? '✓ ' : ''}{test}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        {labTests.length > 0 && (
-                                            <div className="border-t border-purple-200 pt-3 mt-3">
-                                                <div className="text-sm font-medium mb-2 text-purple-800">
-                                                    Selected Tests ({labTests.length}):
-                                                </div>
-                                                <div className="space-y-2">
-                                                    {labTests.map(test => (
-                                                        <div key={test.testName} className="flex justify-between items-center bg-white p-3 rounded-lg border border-purple-200">
-                                                            <span className="text-sm font-medium">{test.testName}</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeLabTest(test.testName)}
-                                                                className="text-red-600 hover:text-red-800 text-sm font-medium"
-                                                            >
-                                                                ✕ Remove
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Prescription */}
-                                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <label className="block text-sm font-medium text-green-800">
-                                                💊 Prescription
-                                            </label>
-                                            <button
-                                                type="button"
-                                                onClick={addMedicine}
-                                                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
-                                            >
-                                                + Add Medicine
-                                            </button>
-                                        </div>
-
-                                        {medicines.length > 0 ? (
-                                            <div className="space-y-4">
-                                                {medicines.map((med, index) => (
-                                                    <div key={index} className="bg-white p-4 rounded-lg border border-green-200">
-                                                        <div className="grid grid-cols-2 gap-3 mb-3">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Medicine name *"
-                                                                value={med.medicineName}
-                                                                onChange={(e) => updateMedicine(index, 'medicineName', e.target.value)}
-                                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                            />
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Dosage (e.g., 500mg) *"
-                                                                value={med.dosage}
-                                                                onChange={(e) => updateMedicine(index, 'dosage', e.target.value)}
-                                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                            />
-                                                        </div>
-                                                        <div className="grid grid-cols-3 gap-3">
-                                                            <input
-                                                                type="text"
-                                                                placeholder="Duration (e.g., 7 days)"
-                                                                value={med.duration}
-                                                                onChange={(e) => updateMedicine(index, 'duration', e.target.value)}
-                                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                            />
-                                                            <input
-                                                                type="number"
-                                                                min="1"
-                                                                placeholder="Quantity"
-                                                                value={med.quantity}
-                                                                onChange={(e) => updateMedicine(index, 'quantity', parseInt(e.target.value) || 1)}
-                                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                            />
-                                                            <input
-                                                                type="number"
-                                                                min="0"
-                                                                placeholder="Price (₹)"
-                                                                value={med.price}
-                                                                onChange={(e) => updateMedicine(index, 'price', parseInt(e.target.value) || 50)}
-                                                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                            />
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeMedicine(index)}
-                                                            className="mt-3 text-red-600 hover:text-red-800 text-sm font-medium"
-                                                        >
-                                                            ✕ Remove Medicine
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="text-sm text-gray-500 text-center py-4 bg-white rounded border border-green-200">
-                                                No medicines added yet. Click "Add Medicine" to prescribe.
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        onClick={handleSubmit}
-                                        disabled={loading}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-4 rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold text-lg transition-all disabled:bg-gray-400 shadow-lg"
-                                    >
-                                        {loading ? 'Creating Encounter...' : '✅ Create Encounter & Submit Orders'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        // ============================================
-        // LAB MODULE
-        // ============================================
-        function LabModule() {
-            const [tests, setTests] = useState([]);
-            const [selectedTest, setSelectedTest] = useState(null);
-            const [result, setResult] = useState('');
-            const [message, setMessage] = useState(null);
-            const [filter, setFilter] = useState('PENDING');
-            const [loading, setLoading] = useState(false);
-
-            useEffect(() => {
-                loadTests();
-            }, [filter]);
-
-            const loadTests = async () => {
-                if (filter === 'PENDING') {
-                    const pendingTests = await LabService.getPendingTests();
-                    setTests(pendingTests.sort((a, b) => new Date(b.orderedAt) - new Date(a.orderedAt)));
-                } else {
-                    const allTests = await LabService.getAllTests();
-                    setTests(allTests.sort((a, b) => new Date(b.orderedAt) - new Date(a.orderedAt)));
-                }
-            };
-
-            const handleSubmitResult = async () => {
-                if (!result.trim()) {
-                    setMessage({ type: 'error', text: '❌ Please enter test result' });
-                    return;
-                }
-
-                setLoading(true);
-                try {
-                    await LabService.updateTestResult(selectedTest.testId, result);
-                    setMessage({ type: 'success', text: `✅ Test result submitted successfully!\n\nTest: ${selectedTest.testName}\nResult: ${result}` });
-                    setSelectedTest(null);
-                    setResult('');
-                    await loadTests();
-                } catch (error) {
-                    setMessage({ type: 'error', text: '❌ Failed to submit result: ' + error.message });
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return (
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="hms-page-title">
-                        <span className="mr-3">🔬</span>
-                        Laboratory Module
-                    </h2>
-
-                    {message && (
-                        <div className={`mb-6 p-4 rounded-lg shadow-md ${message.type === 'success' ? 'bg-green-50 border-l-4 border-green-500 text-green-800' : 'bg-red-50 border-l-4 border-red-500 text-red-800'}`}>
-                            <div className="font-medium whitespace-pre-line">{message.text}</div>
-                        </div>
-                    )}
-
-                    <div className="hms-card">
-                        <div className="flex justify-between items-center mb-6 border-b pb-4">
-                            <h3 className="text-xl font-semibold text-purple-700">Lab Tests</h3>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setFilter('PENDING')}
-                                    className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                                        filter === 'PENDING' 
-                                            ? 'bg-orange-600 text-white shadow-md' 
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    Pending Tests
-                                </button>
-                                <button
-                                    onClick={() => setFilter('ALL')}
-                                    className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                                        filter === 'ALL' 
-                                            ? 'bg-purple-600 text-white shadow-md' 
-                                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    All Tests
-                                </button>
-                            </div>
-                        </div>
-
-                        {tests.length === 0 ? (
-                            <div className="text-center py-16 text-gray-500">
-                                <div className="text-6xl mb-4">🔬</div>
-                                <div className="text-xl font-medium">No {filter === 'PENDING' ? 'pending' : ''} tests found</div>
-                                <div className="text-sm mt-2">Tests ordered by doctors will appear here</div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {tests.map(test => (
-                                    <div key={test.testId} className={`border-2 rounded-lg p-5 transition-all ${
-                                        test.status === 'COMPLETED' 
-                                            ? 'bg-green-50 border-green-200' 
-                                            : 'bg-orange-50 border-orange-200'
-                                    }`}>
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-xl text-gray-800 mb-2">{test.testName}</div>
-                                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                                    <div>
-                                                        <span className="text-gray-600">Patient ID:</span>
-                                                        <span className="ml-2 font-mono font-medium text-blue-600">{test.patientId}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-gray-600">Encounter ID:</span>
-                                                        <span className="ml-2 font-mono font-medium text-purple-600">{test.encounterId}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-xs text-gray-500 mt-2">
-                                                    Ordered: {new Date(test.orderedAt).toLocaleString()}
-                                                </div>
-                                                <div className="mt-3">
-                                                    <span className={`inline-block px-4 py-1 text-sm rounded-full font-medium ${
-                                                        test.status === 'COMPLETED' 
-                                                            ? 'bg-green-500 text-white' 
-                                                            : 'bg-orange-500 text-white'
-                                                    }`}>
-                                                        {test.status === 'COMPLETED' ? '✓ COMPLETED' : '⏳ PENDING'}
-                                                    </span>
-                                                </div>
-                                                {test.status === 'COMPLETED' && (
-                                                    <div className="mt-4 p-4 bg-white rounded-lg border-2 border-green-300">
-                                                        <div className="text-sm font-semibold text-green-800 mb-1">Test Result:</div>
-                                                        <div className="text-sm text-gray-700">{test.result}</div>
-                                                        <div className="text-xs text-gray-500 mt-2">
-                                                            Completed: {new Date(test.completedAt).toLocaleString()}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            {test.status === 'PENDING' && (
-                                                <button
-                                                    onClick={() => {setSelectedTest(test); setMessage(null);}}
-                                                    className="ml-4 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium transition-all shadow-md"
-                                                >
-                                                    Enter Result →
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Result Entry Modal */}
-                    {selectedTest && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div className="bg-white rounded-lg p-6 max-w-lg w-full shadow-2xl">
-                                <h3 className="text-xl font-bold mb-4 text-purple-700">Enter Test Result</h3>
-                                <div className="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
-                                    <div className="text-sm text-gray-700 mb-2">
-                                        <span className="font-medium">Test:</span> 
-                                        <span className="ml-2 text-purple-700 font-semibold">{selectedTest.testName}</span>
-                                    </div>
-                                    <div className="text-sm text-gray-700 mb-2">
-                                        <span className="font-medium">Patient ID:</span> 
-                                        <span className="ml-2 font-mono">{selectedTest.patientId}</span>
-                                    </div>
-                                    <div className="text-sm text-gray-700">
-                                        <span className="font-medium">Encounter ID:</span> 
-                                        <span className="ml-2 font-mono">{selectedTest.encounterId}</span>
-                                    </div>
-                                </div>
-                                <textarea
-                                    value={result}
-                                    onChange={(e) => setResult(e.target.value)}
-                                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                                    rows="5"
-                                    placeholder="Enter test result (e.g., Normal, Abnormal with values, detailed findings, etc.)"
-                                />
-                                <div className="flex gap-3 mt-4">
-                                    <button
-                                        onClick={handleSubmitResult}
-                                        disabled={loading}
-                                        className="hms-btn hms-btn-success"
-                                    >
-                                        {loading ? 'Submitting...' : '✅ Submit Result'}
-                                    </button>
-                                    <button
-                                        onClick={() => {setSelectedTest(null); setResult('');}}
-                                        className="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-400 font-medium transition-all"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        // ============================================
-        // PHARMACY MODULE
-        // ============================================
-        function PharmacyModule() {
-            const [prescriptions, setPrescriptions] = useState([]);
-            const [selectedPrescription, setSelectedPrescription] = useState(null);
-            const [patientDetails, setPatientDetails] = useState(null);
-            const [message, setMessage] = useState(null);
-            const [loading, setLoading] = useState(false);
-
-            useEffect(() => {
-                loadPrescriptions();
-            }, []);
-
-            const loadPrescriptions = async () => {
-                const pending = await PharmacyService.getPendingPrescriptions();
-                setPrescriptions(pending.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-            };
-
-            const viewPrescription = async (prescription) => {
-                const patient = await PatientService.getPatient(prescription.patientId);
-                setPatientDetails(patient);
-                setSelectedPrescription(prescription);
-                setMessage(null);
-            };
-
-            const handleIssueMedicines = async () => {
-                setLoading(true);
-                try {
-                    const bill = await PharmacyService.issueMedicines(selectedPrescription.prescriptionId, selectedPrescription.medicines);
-                    setMessage({ 
-                        type: 'success', 
-                        text: `✅ Medicines issued successfully!\n\nBill ID: ${bill.billId}\nTotal Amount: ₹${bill.totalAmount}\n\nBill is now available in Billing module.` 
-                    });
-                    setSelectedPrescription(null);
-                    setPatientDetails(null);
-                    await loadPrescriptions();
-                } catch (error) {
-                    setMessage({ type: 'error', text: '❌ Failed to issue medicines: ' + error.message });
-                } finally {
-                    setLoading(false);
-                }
-            };
-
-            return (
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="hms-page-title">
-                        <span className="mr-3">💊</span>
-                        Pharmacy Module
-                    </h2>
-
-                    {message && (
-                        <div className={`mb-6 p-4 rounded-lg shadow-md ${message.type === 'success' ? 'bg-green-50 border-l-4 border-green-500 text-green-800' : 'bg-red-50 border-l-4 border-red-500 text-red-800'}`}>
-                            <div className="font-medium whitespace-pre-line">{message.text}</div>
-                        </div>
-                    )}
-
-                    <div className="hms-card">
-                        <h3 className="hms-card-title">
-                            Pending Prescriptions ({prescriptions.length})
-                        </h3>
-
-                        {prescriptions.length === 0 ? (
-                            <div className="text-center py-16 text-gray-500">
-                                <div className="text-6xl mb-4">💊</div>
-                                <div className="text-xl font-medium">No pending prescriptions</div>
-                                <div className="text-sm mt-2">Prescriptions created by doctors will appear here</div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {prescriptions.map(prescription => (
-                                    <div key={prescription.prescriptionId} className="border-2 border-green-200 rounded-lg p-5 bg-green-50 transition-all hover:shadow-md">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex-1">
-                                                <div className="font-semibold text-lg text-gray-800">
-                                                    Prescription ID: <span className="font-mono text-green-700">{prescription.prescriptionId}</span>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2 text-sm mt-2">
-                                                    <div>
-                                                        <span className="text-gray-600">Patient ID:</span>
-                                                        <span className="ml-2 font-mono font-medium text-blue-600">{prescription.patientId}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-gray-600">Encounter ID:</span>
-                                                        <span className="ml-2 font-mono font-medium text-purple-600">{prescription.encounterId}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-sm text-gray-700 mt-2">
-                                                    <span className="font-medium">Medicines:</span> {prescription.medicines.length} items
-                                                </div>
-                                                <div className="text-xs text-gray-500 mt-2">
-                                                    Created: {new Date(prescription.createdAt).toLocaleString()}
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() => viewPrescription(prescription)}
-                                                className="ml-4 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-all shadow-md"
-                                            >
-                                                View & Issue →
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Prescription Details Modal */}
-                    {selectedPrescription && patientDetails && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div className="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                                <h3 className="text-2xl font-bold mb-4 text-green-700">💊 Prescription Details</h3>
-                                
-                                <div className="mb-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
-                                    <div className="font-semibold text-lg text-blue-800 mb-2">Patient Information</div>
-                                    <div className="grid grid-cols-2 gap-2 text-sm">
-                                        <div>
-                                            <span className="text-gray-600">Name:</span>
-                                            <span className="ml-2 font-medium">{patientDetails.firstName} {patientDetails.lastName}</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-600">Patient ID:</span>
-                                            <span className="ml-2 font-mono">{patientDetails.patientId}</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-600">Age:</span>
-                                            <span className="ml-2">{patientDetails.age}</span>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-600">Gender:</span>
-                                            <span className="ml-2">{patientDetails.gender}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mb-4">
-                                    <div className="font-semibold text-lg mb-3 text-green-800">Medicines to Issue:</div>
-                                    <div className="space-y-3">
-                                        {selectedPrescription.medicines.map((med, index) => (
-                                            <div key={index} className="border-2 border-green-200 rounded-lg p-4 bg-green-50">
-                                                <div className="font-semibold text-lg text-gray-800 mb-2">{index + 1}. {med.medicineName}</div>
-                                                <div className="grid grid-cols-3 gap-3 text-sm">
-                                                    <div>
-                                                        <span className="text-gray-600">Dosage:</span>
-                                                        <span className="ml-2 font-medium">{med.dosage}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-gray-600">Duration:</span>
-                                                        <span className="ml-2 font-medium">{med.duration}</span>
-                                                    </div>
-                                                    <div>
-                                                        <span className="text-gray-600">Quantity:</span>
-                                                        <span className="ml-2 font-medium">{med.quantity}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-2 text-sm font-medium text-green-700">
-                                                    Price: ₹{med.price || 50} × {med.quantity} = ₹{(med.price || 50) * med.quantity}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="bg-green-100 border-2 border-green-400 p-4 rounded-lg mb-4">
-                                    <div className="text-2xl font-bold text-green-800">
-                                        Total Bill Amount: ₹{selectedPrescription.medicines.reduce((sum, med) => sum + ((med.price || 50) * med.quantity), 0)}
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={handleIssueMedicines}
-                                        disabled={loading}
-                                        className="hms-btn hms-btn-success"
-                                    >
-                                        {loading ? 'Processing...' : '✅ Issue Medicines & Generate Bill'}
-                                    </button>
-                                    <button
-                                        onClick={() => {setSelectedPrescription(null); setPatientDetails(null);}}
-                                        className="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-400 font-semibold transition-all"
-                                    >
-                                        Cancel
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        // ============================================
-        // BILLING MODULE
-        // ============================================
-        function BillingModule() {
-            const [patients, setPatients] = useState([]);
-            const [selectedPatient, setSelectedPatient] = useState(null);
-            const [bills, setBills] = useState([]);
-
-            useEffect(() => {
-                loadPatients();
-            }, []);
-
-            const loadPatients = async () => {
-                const allPatients = await PatientService.getAllPatients();
-                setPatients(allPatients.sort((a, b) => new Date(b.registeredAt) - new Date(a.registeredAt)));
-            };
-
-            const loadPatientBills = async (patientId) => {
-                const patientBills = await BillingService.getBillsByPatient(patientId);
-                setBills(patientBills.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
-            };
-
-            const handlePatientSelect = async (patient) => {
-                setSelectedPatient(patient);
-                await loadPatientBills(patient.patientId);
-            };
-
-            const getTotalAmount = () => bills.reduce((sum, bill) => sum + bill.totalAmount, 0);
-
-            return (
-                <div className="max-w-7xl mx-auto">
-                    <h2 className="hms-page-title">
-                        <span className="mr-3">💳</span>
-                        Billing Module (Demo)
-                    </h2>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Patient List */}
-                        <div className="lg:col-span-1">
-                            <div className="hms-card" style={{position:"sticky", top:"80px"}}>
-                                <h3 className="text-lg font-semibold mb-4 text-blue-700 border-b pb-2">Select Patient</h3>
-                                <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                                    {patients.length === 0 ? (
-                                        <div className="text-center py-8 text-gray-500">
-                                            <div className="text-4xl mb-2">👥</div>
-                                            <div className="text-sm">No patients registered</div>
-                                        </div>
-                                    ) : (
-                                        patients.map(patient => (
-                                            <div
-                                                key={patient.patientId}
-                                                onClick={() => handlePatientSelect(patient)}
-                                                className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                                                    selectedPatient?.patientId === patient.patientId 
-                                                        ? 'bg-blue-100 border-blue-500 shadow-md' 
-                                                        : 'border-gray-200 hover:bg-blue-50 hover:border-blue-300'
-                                                }`}
-                                            >
-                                                <div className="font-semibold text-gray-800">{patient.firstName} {patient.lastName}</div>
-                                                <div className="text-xs font-mono text-gray-600">{patient.patientId}</div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Bills */}
-                        <div className="lg:col-span-2">
-                            <div className="hms-card">
-                                <h3 className="text-lg font-semibold mb-4 text-green-700 border-b pb-2">
-                                    {selectedPatient ? `Bills for ${selectedPatient.firstName} ${selectedPatient.lastName}` : 'Patient Bills'}
-                                </h3>
-                                {!selectedPatient ? (
-                                    <div className="text-gray-500 text-center py-16">
-                                        <div className="text-6xl mb-4">💳</div>
-                                        <div className="text-xl">Select a patient to view bills</div>
-                                    </div>
-                                ) : bills.length === 0 ? (
-                                    <div className="text-gray-500 text-center py-16">
-                                        <div className="text-6xl mb-4">📄</div>
-                                        <div className="text-xl">No bills found for this patient</div>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className="mb-6 p-4 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg border-2 border-green-300">
-                                            <div className="text-center">
-                                                <div className="text-sm text-gray-600 mb-1">Total Bills: {bills.length}</div>
-                                                <div className="text-3xl font-bold text-green-700">
-                                                    Total Amount: ₹{getTotalAmount()}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-4 max-h-[700px] overflow-y-auto">
-                                            {bills.map(bill => (
-                                                <div key={bill.billId} className="border-2 border-gray-200 rounded-lg p-5 bg-gray-50">
-                                                    <div className="flex justify-between items-start mb-4">
-                                                        <div>
-                                                            <div className="font-semibold text-xl text-gray-800">{bill.billId}</div>
-                                                            <div className={`inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium ${
-                                                                bill.type === 'REGISTRATION' 
-                                                                    ? 'bg-blue-100 text-blue-700' 
-                                                                    : 'bg-green-100 text-green-700'
-                                                            }`}>
-                                                                {bill.type === 'REGISTRATION' ? '📋 Registration' : '💊 Pharmacy'}
-                                                            </div>
-                                                            <div className="text-xs text-gray-500 mt-2">
-                                                                {new Date(bill.createdAt).toLocaleString()}
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <div className="text-3xl font-bold text-green-600">
-                                                                ₹{bill.totalAmount}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="border-t-2 border-gray-300 pt-4">
-                                                        <div className="text-sm font-semibold mb-3 text-gray-700">Itemized Bill:</div>
-                                                        <div className="bg-white rounded-lg overflow-hidden border border-gray-200">
-                                                            <table className="w-full text-sm">
-                                                                <thead className="bg-gray-100 border-b-2 border-gray-300">
-                                                                    <tr>
-                                                                        <th className="text-left p-3 font-semibold">Item</th>
-                                                                        <th className="text-center p-3 font-semibold">Qty</th>
-                                                                        <th className="text-right p-3 font-semibold">Price</th>
-                                                                        <th className="text-right p-3 font-semibold">Total</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {bill.items.map((item, index) => (
-                                                                        <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-                                                                            <td className="p-3">{item.name}</td>
-                                                                            <td className="text-center p-3">{item.quantity}</td>
-                                                                            <td className="text-right p-3">₹{item.price}</td>
-                                                                            <td className="text-right p-3 font-medium">₹{item.total}</td>
-                                                                        </tr>
-                                                                    ))}
-                                                                </tbody>
-                                                                <tfoot className="bg-green-50 border-t-2 border-green-300">
-                                                                    <tr>
-                                                                        <td colSpan="3" className="text-right p-3 font-bold text-gray-800">Grand Total:</td>
-                                                                        <td className="text-right p-3 font-bold text-green-700 text-lg">₹{bill.totalAmount}</td>
-                                                                    </tr>
-                                                                </tfoot>
-                                                            </table>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // ============================================
-        // ADMIN MODULE
-        // ============================================
-        function AdminModule() {
-            const [stats, setStats] = useState(null);
-
-            useEffect(() => {
-                loadStats();
-                const interval = setInterval(loadStats, 5000); // Refresh every 5 seconds
-                return () => clearInterval(interval);
-            }, []);
-
-            const loadStats = async () => {
-                const dashboardStats = await AdminService.getDashboardStats();
-                setStats(dashboardStats);
-            };
-
-            if (!stats) {
-                return (
-                    <div className="flex items-center justify-center py-16">
-                        <div className="text-xl text-gray-600">Loading dashboard statistics...</div>
-                    </div>
-                );
-            }
-
-            return (
-                <div className="max-w-7xl mx-auto">
-                    <h2 className="hms-page-title">
-                        <span className="mr-3">📊</span>
-                        Admin Dashboard
-                    </h2>
-
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                        <div className="hms-stat-card">
-                            <div className="hms-stat-icon" style={{background:'#dbeafe'}}>👤</div>
-                            <div><div className="hms-stat-value">{stats.totalPatients}</div><div className="hms-stat-label">Total Patients</div></div>
-                        </div>
-                        <div className="hms-stat-card">
-                            <div className="hms-stat-icon" style={{background:'#d1fae5'}}>🩺</div>
-                            <div><div className="hms-stat-value">{stats.totalEncounters}</div><div className="hms-stat-label">Consultations</div></div>
-                        </div>
-                        <div className="hms-stat-card">
-                            <div className="hms-stat-icon" style={{background:'#ede9fe'}}>🔬</div>
-                            <div><div className="hms-stat-value">{stats.totalTests}</div><div className="hms-stat-label">Lab Tests · {stats.pendingTests} pending</div></div>
-                        </div>
-                        <div className="hms-stat-card">
-                            <div className="hms-stat-icon" style={{background:'#fef9c3'}}>₹</div>
-                            <div><div className="hms-stat-value">₹{stats.totalRevenue}</div><div className="hms-stat-label">Total Revenue</div></div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                        <div className="hms-stat-card">
-                            <div className="hms-stat-icon" style={{background:'#fce7f3'}}>💊</div>
-                            <div><div className="hms-stat-value">{stats.totalPrescriptions}</div><div className="hms-stat-label">Prescriptions · {stats.issuedPrescriptions} issued</div></div>
-                        </div>
-                        <div className="hms-stat-card">
-                            <div className="hms-stat-icon" style={{background:'#ccfbf1'}}>🧾</div>
-                            <div><div className="hms-stat-value">{stats.totalBills}</div><div className="hms-stat-label">Bills Generated</div></div>
-                        </div>
-                    </div>
-
-                    {/* Activity Log */}
-                    <div className="hms-card">
-                        <div className="hms-card-title">📝 Recent Activity Log</div>
-                        <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                            {stats.recentActivity.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    <div className="text-4xl mb-2">📋</div>
-                                    <div>No activity yet</div>
-                                </div>
-                            ) : (
-                                stats.recentActivity.map((activity, index) => (
-                                    <div key={activity.logId || index} className="hms-patient-card" style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start"}}>
-                                        <div className="flex-1">
-                                            <div className="font-semibold text-gray-800">{activity.action}</div>
-                                            <div className="text-sm text-gray-600 mt-1">{activity.description}</div>
-                                        </div>
-                                        <div className="text-xs text-gray-500 whitespace-nowrap ml-4">
-                                            {new Date(activity.timestamp).toLocaleString()}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        // ============================================
-        // RENDER APP
-        // ============================================
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<HospitalManagementSystem />);
-    </script>
-</body>
-</html>
+require('dotenv').config();
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bcrypt = require('bcryptjs');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ─── LESSON 1: CORS preflight fix — handles OPTIONS before anything else ──────
+// Without this, GitHub Pages → Render gives ERR_CONNECTION_CLOSED
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+app.use(cors());
+app.use(express.json());
+
+// ─── MongoDB Connection ────────────────────────────────────────────────────────
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ Connected to MongoDB Atlas'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ─── SCHEMAS ──────────────────────────────────────────────────────────────────
+
+const doctorSchema = new mongoose.Schema({
+  doctorId: { type: String, required: true, unique: true },
+  name: { type: String, required: true, trim: true },
+  specialization: { type: String, required: true, trim: true },
+  phone: { type: String, default: '' },
+  email: { type: String, default: '' },
+  qualification: { type: String, default: '' },
+  passwordHash: { type: String, required: true },
+  registeredAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+// Staff accounts schema (reception, lab, pharmacy, billing, admin)
+const staffSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true, trim: true },
+  passwordHash: { type: String, required: true },
+  role: { type: String, required: true, enum: ['reception', 'lab', 'pharmacy', 'billing', 'admin'] },
+  name: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const patientSchema = new mongoose.Schema({
+  patientId: { type: String, required: true, unique: true },
+  firstName: { type: String, required: true, trim: true },
+  lastName: { type: String, default: '', trim: true },
+  age: { type: Number, required: true, min: 0, max: 150 },
+  gender: { type: String, required: true, enum: ['Male', 'Female', 'Other'] },
+  phone: { type: String, default: '' },
+  address: { type: String, default: '' },
+  chiefComplaint: { type: String, required: true },
+  assignedDoctorId: { type: String, default: '' },
+  registeredAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const encounterSchema = new mongoose.Schema({
+  encounterId: { type: String, required: true, unique: true },
+  patientId: { type: String, required: true, index: true },
+  doctorName: { type: String, required: true },
+  diagnosis: { type: String, required: true },
+  notes: { type: String, default: '' },
+  createdAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const labTestSchema = new mongoose.Schema({
+  testId: { type: String, required: true, unique: true },
+  encounterId: { type: String, required: true, index: true },
+  patientId: { type: String, required: true },
+  testName: { type: String, required: true },
+  status: { type: String, enum: ['PENDING', 'COMPLETED'], default: 'PENDING', index: true },
+  result: { type: String, default: null },
+  orderedAt: { type: Date, default: Date.now },
+  completedAt: { type: Date, default: null }
+}, { timestamps: true });
+
+const prescriptionSchema = new mongoose.Schema({
+  prescriptionId: { type: String, required: true, unique: true },
+  encounterId: { type: String, required: true, index: true },
+  patientId: { type: String, required: true },
+  medicines: [{
+    medicineName: String,
+    dosage: String,
+    duration: String,
+    quantity: { type: Number, default: 1 },
+    price: { type: Number, default: 50 }
+  }],
+  status: { type: String, enum: ['PENDING', 'ISSUED'], default: 'PENDING' },
+  issuedAt: { type: Date, default: null },
+  createdAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const billSchema = new mongoose.Schema({
+  billId: { type: String, required: true, unique: true },
+  patientId: { type: String, required: true, index: true },
+  prescriptionId: { type: String, default: null },
+  type: { type: String, enum: ['REGISTRATION', 'PHARMACY'], required: true },
+  items: [{
+    name: String,
+    quantity: Number,
+    price: Number,
+    total: Number
+  }],
+  totalAmount: { type: Number, required: true },
+  createdAt: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const activityLogSchema = new mongoose.Schema({
+  action: { type: String, required: true },
+  description: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now }
+}, { timestamps: true });
+
+const Doctor = mongoose.model('Doctor', doctorSchema);
+const Staff = mongoose.model('Staff', staffSchema);
+const Patient = mongoose.model('Patient', patientSchema);
+const Encounter = mongoose.model('Encounter', encounterSchema);
+const LabTest = mongoose.model('LabTest', labTestSchema);
+const Prescription = mongoose.model('Prescription', prescriptionSchema);
+const Bill = mongoose.model('Bill', billSchema);
+const ActivityLog = mongoose.model('ActivityLog', activityLogSchema);
+
+// ─── HELPER ───────────────────────────────────────────────────────────────────
+async function logActivity(action, description) {
+  try {
+    await ActivityLog.create({ action, description });
+  } catch (e) {
+    console.error('Activity log error:', e.message);
+  }
+}
+
+// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'HMS Backend is running',
+    mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
+
+// Staff login (reception, lab, pharmacy, billing, admin)
+app.post('/api/auth/staff-login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+    const staff = await Staff.findOne({ username: username.trim() });
+    if (!staff) return res.status(401).json({ error: 'Invalid username or password' });
+    const match = await bcrypt.compare(password.trim(), staff.passwordHash);
+    if (!match) return res.status(401).json({ error: 'Invalid username or password' });
+    res.json({ success: true, user: { username: staff.username, role: staff.role, name: staff.name } });
+  } catch (e) {
+    res.status(500).json({ error: 'Login failed', details: e.message });
+  }
+});
+
+// Doctor login
+app.post('/api/auth/doctor-login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+    const doctor = await Doctor.findOne({ doctorId: username.trim() });
+    if (!doctor) return res.status(401).json({ error: 'Invalid doctor ID or password' });
+    const match = await bcrypt.compare(password.trim(), doctor.passwordHash);
+    if (!match) return res.status(401).json({ error: 'Invalid doctor ID or password' });
+    res.json({ success: true, user: { username: doctor.doctorId, role: 'doctor', name: doctor.name, specialization: doctor.specialization } });
+  } catch (e) {
+    res.status(500).json({ error: 'Login failed', details: e.message });
+  }
+});
+
+// Setup initial staff accounts (run once — admin protected by env secret)
+app.post('/api/auth/setup-staff', async (req, res) => {
+  try {
+    const { setupSecret, accounts } = req.body;
+    if (setupSecret !== process.env.SETUP_SECRET) return res.status(403).json({ error: 'Forbidden' });
+    const results = [];
+    for (const acc of accounts) {
+      const passwordHash = await bcrypt.hash(acc.password, 10);
+      const existing = await Staff.findOne({ username: acc.username });
+      if (existing) {
+        existing.passwordHash = passwordHash;
+        existing.name = acc.name;
+        existing.role = acc.role;
+        await existing.save();
+        results.push({ username: acc.username, action: 'updated' });
+      } else {
+        await Staff.create({ username: acc.username, passwordHash, role: acc.role, name: acc.name });
+        results.push({ username: acc.username, action: 'created' });
+      }
+    }
+    res.json({ success: true, results });
+  } catch (e) {
+    res.status(500).json({ error: 'Setup failed', details: e.message });
+  }
+});
+
+// Change staff password
+app.post('/api/auth/change-password', async (req, res) => {
+  try {
+    const { username, oldPassword, newPassword } = req.body;
+    const staff = await Staff.findOne({ username });
+    if (!staff) return res.status(404).json({ error: 'User not found' });
+    const match = await bcrypt.compare(oldPassword, staff.passwordHash);
+    if (!match) return res.status(401).json({ error: 'Current password incorrect' });
+    staff.passwordHash = await bcrypt.hash(newPassword, 10);
+    await staff.save();
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to change password', details: e.message });
+  }
+});
+
+// ─── DOCTOR ROUTES ────────────────────────────────────────────────────────────
+
+app.get('/api/doctors', async (req, res) => {
+  try {
+    const doctors = await Doctor.find({}, { passwordHash: 0 }).sort({ registeredAt: -1 });
+    res.json(doctors);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch doctors', details: e.message });
+  }
+});
+
+app.post('/api/doctors', async (req, res) => {
+  try {
+    const { name, specialization, phone, email, qualification, password } = req.body;
+    if (!name || !specialization) return res.status(400).json({ error: 'Name and specialization are required' });
+    if (!password || password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    const doctorId = 'DOC' + Date.now();
+    const passwordHash = await bcrypt.hash(password, 10);
+    const doctor = await Doctor.create({ doctorId, name, specialization, phone, email, qualification, passwordHash });
+    await logActivity('Doctor Registered', `Doctor ${doctorId} - ${name} (${specialization})`);
+    console.log(`✅ Doctor registered: ${name}`);
+    const { passwordHash: _, ...doctorData } = doctor.toObject();
+    res.status(201).json({ ...doctorData, loginId: doctorId });
+  } catch (e) {
+    if (e.name === 'ValidationError') return res.status(400).json({ error: 'Validation failed', details: e.message });
+    res.status(500).json({ error: 'Failed to register doctor', details: e.message });
+  }
+});
+
+app.put('/api/doctors/:doctorId', async (req, res) => {
+  try {
+    const { name, specialization, phone, email, qualification } = req.body;
+    const doctor = await Doctor.findOneAndUpdate(
+      { doctorId: req.params.doctorId },
+      { name, specialization, phone, email, qualification },
+      { new: true, select: '-passwordHash' }
+    );
+    if (!doctor) return res.status(404).json({ error: 'Doctor not found' });
+    await logActivity('Doctor Updated', `Doctor ${doctor.doctorId} - ${doctor.name} updated`);
+    res.json(doctor);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update doctor', details: e.message });
+  }
+});
+
+// ─── PATIENT ROUTES ───────────────────────────────────────────────────────────
+
+app.get('/api/patients', async (req, res) => {
+  try {
+    const patients = await Patient.find().sort({ registeredAt: -1 });
+    res.json(patients);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch patients', details: e.message });
+  }
+});
+
+app.get('/api/patients/:id', async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ patientId: req.params.id });
+    if (!patient) return res.status(404).json({ error: 'Patient not found' });
+    res.json(patient);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch patient', details: e.message });
+  }
+});
+
+app.post('/api/patients', async (req, res) => {
+  try {
+    const { firstName, lastName, age, gender, phone, address, chiefComplaint, assignedDoctorId } = req.body;
+    if (!firstName || !age || !gender || !chiefComplaint) {
+      return res.status(400).json({ error: 'First name, age, gender, and chief complaint are required' });
+    }
+    if (!assignedDoctorId) {
+      return res.status(400).json({ error: 'Please assign a doctor to the patient' });
+    }
+
+    const patientId = 'PAT' + Date.now();
+
+    // Create patient
+    const patient = await Patient.create({ patientId, firstName, lastName, age, gender, phone, address, chiefComplaint, assignedDoctorId });
+
+    // Auto-create registration bill
+    const billId = 'BILL' + Date.now();
+    const bill = await Bill.create({
+      billId,
+      patientId,
+      type: 'REGISTRATION',
+      items: [{ name: 'Consultation Fee', quantity: 1, price: 500, total: 500 }],
+      totalAmount: 500
+    });
+
+    await logActivity('Patient Registered', `Patient ${patientId} - ${firstName} ${lastName || ''}`);
+    console.log(`✅ Patient registered: ${firstName} ${lastName || ''}`);
+    res.status(201).json({ patient, bill });
+  } catch (e) {
+    if (e.name === 'ValidationError') return res.status(400).json({ error: 'Validation failed', details: e.message });
+    res.status(500).json({ error: 'Failed to register patient', details: e.message });
+  }
+});
+
+// ─── ENCOUNTER ROUTES ─────────────────────────────────────────────────────────
+
+app.get('/api/encounters', async (req, res) => {
+  try {
+    const encounters = await Encounter.find().sort({ createdAt: -1 });
+    res.json(encounters);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch encounters', details: e.message });
+  }
+});
+
+app.get('/api/encounters/patient/:patientId', async (req, res) => {
+  try {
+    const encounters = await Encounter.find({ patientId: req.params.patientId }).sort({ createdAt: -1 });
+    res.json(encounters);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch encounters', details: e.message });
+  }
+});
+
+app.post('/api/encounters', async (req, res) => {
+  try {
+    const { patientId, doctorName, diagnosis, notes } = req.body;
+    if (!patientId || !doctorName || !diagnosis) {
+      return res.status(400).json({ error: 'Patient ID, doctor name, and diagnosis are required' });
+    }
+    const encounterId = 'ENC' + Date.now();
+    const encounter = await Encounter.create({ encounterId, patientId, doctorName, diagnosis, notes: notes || '' });
+    await logActivity('Encounter Created', `Encounter ${encounterId} by ${doctorName} for patient ${patientId}`);
+    console.log(`✅ Encounter created: ${encounterId}`);
+    res.status(201).json(encounter);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to create encounter', details: e.message });
+  }
+});
+
+// ─── LAB TEST ROUTES ──────────────────────────────────────────────────────────
+
+app.get('/api/labtests', async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+    const tests = await LabTest.find(filter).sort({ orderedAt: -1 });
+    res.json(tests);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch lab tests', details: e.message });
+  }
+});
+
+app.get('/api/labtests/encounter/:encounterId', async (req, res) => {
+  try {
+    const tests = await LabTest.find({ encounterId: req.params.encounterId }).sort({ orderedAt: -1 });
+    res.json(tests);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch lab tests', details: e.message });
+  }
+});
+
+app.post('/api/labtests/bulk', async (req, res) => {
+  try {
+    const { encounterId, patientId, tests } = req.body;
+    if (!encounterId || !patientId || !tests || !Array.isArray(tests)) {
+      return res.status(400).json({ error: 'encounterId, patientId, and tests array are required' });
+    }
+    const created = [];
+    for (const test of tests) {
+      const testId = 'TEST' + Date.now() + Math.random().toString(36).substr(2, 5);
+      const labTest = await LabTest.create({ testId, encounterId, patientId, testName: test.testName });
+      created.push(labTest);
+    }
+    await logActivity('Lab Tests Ordered', `${tests.length} tests ordered for encounter ${encounterId}`);
+    res.status(201).json(created);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to order lab tests', details: e.message });
+  }
+});
+
+app.put('/api/labtests/:testId/result', async (req, res) => {
+  try {
+    const { result } = req.body;
+    if (!result || !result.trim()) return res.status(400).json({ error: 'Result is required' });
+    const test = await LabTest.findOneAndUpdate(
+      { testId: req.params.testId },
+      { result, status: 'COMPLETED', completedAt: new Date() },
+      { new: true }
+    );
+    if (!test) return res.status(404).json({ error: 'Lab test not found' });
+    await logActivity('Lab Test Completed', `Test ${test.testId} (${test.testName}) completed for patient ${test.patientId}`);
+    console.log(`✅ Lab test completed: ${test.testName}`);
+    res.json(test);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to update test result', details: e.message });
+  }
+});
+
+// ─── PRESCRIPTION ROUTES ──────────────────────────────────────────────────────
+
+app.get('/api/prescriptions', async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+    const prescriptions = await Prescription.find(filter).sort({ createdAt: -1 });
+    res.json(prescriptions);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch prescriptions', details: e.message });
+  }
+});
+
+app.post('/api/prescriptions', async (req, res) => {
+  try {
+    const { encounterId, patientId, medicines } = req.body;
+    if (!encounterId || !patientId || !medicines || medicines.length === 0) {
+      return res.status(400).json({ error: 'encounterId, patientId, and medicines are required' });
+    }
+    const prescriptionId = 'PRESC' + Date.now();
+    const prescription = await Prescription.create({ prescriptionId, encounterId, patientId, medicines });
+    await logActivity('Prescription Created', `Prescription ${prescriptionId} for encounter ${encounterId} with ${medicines.length} medicines`);
+    console.log(`✅ Prescription created: ${prescriptionId}`);
+    res.status(201).json(prescription);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to create prescription', details: e.message });
+  }
+});
+
+app.put('/api/prescriptions/:prescriptionId/issue', async (req, res) => {
+  try {
+    const { medicines } = req.body;
+    const prescription = await Prescription.findOne({ prescriptionId: req.params.prescriptionId });
+    if (!prescription) return res.status(404).json({ error: 'Prescription not found' });
+    if (prescription.status === 'ISSUED') return res.status(400).json({ error: 'Prescription already issued' });
+
+    // Build pharmacy bill
+    const billId = 'BILL' + Date.now();
+    const items = medicines.map(med => ({
+      name: med.medicineName,
+      quantity: med.quantity,
+      price: med.price || 50,
+      total: (med.price || 50) * med.quantity
+    }));
+    const totalAmount = items.reduce((sum, item) => sum + item.total, 0);
+
+    const bill = await Bill.create({
+      billId,
+      patientId: prescription.patientId,
+      prescriptionId: prescription.prescriptionId,
+      type: 'PHARMACY',
+      items,
+      totalAmount
+    });
+
+    // Mark prescription as issued
+    prescription.status = 'ISSUED';
+    prescription.issuedAt = new Date();
+    await prescription.save();
+
+    await logActivity('Medicines Issued', `Prescription ${prescription.prescriptionId} issued — Bill ₹${totalAmount}`);
+    console.log(`✅ Medicines issued: ${prescription.prescriptionId}`);
+    res.json({ prescription, bill });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to issue medicines', details: e.message });
+  }
+});
+
+// ─── BILLING ROUTES ───────────────────────────────────────────────────────────
+
+app.get('/api/bills', async (req, res) => {
+  try {
+    const bills = await Bill.find().sort({ createdAt: -1 });
+    res.json(bills);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch bills', details: e.message });
+  }
+});
+
+app.get('/api/bills/patient/:patientId', async (req, res) => {
+  try {
+    const bills = await Bill.find({ patientId: req.params.patientId }).sort({ createdAt: -1 });
+    res.json(bills);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch bills', details: e.message });
+  }
+});
+
+// ─── ADMIN / STATS ROUTES ─────────────────────────────────────────────────────
+
+app.get('/api/stats', async (req, res) => {
+  try {
+    const [
+      totalPatients, totalEncounters, totalTests,
+      pendingTests, completedTests,
+      totalPrescriptions, pendingPrescriptions, issuedPrescriptions,
+      totalBills, bills, recentActivity
+    ] = await Promise.all([
+      Patient.countDocuments(),
+      Encounter.countDocuments(),
+      LabTest.countDocuments(),
+      LabTest.countDocuments({ status: 'PENDING' }),
+      LabTest.countDocuments({ status: 'COMPLETED' }),
+      Prescription.countDocuments(),
+      Prescription.countDocuments({ status: 'PENDING' }),
+      Prescription.countDocuments({ status: 'ISSUED' }),
+      Bill.countDocuments(),
+      Bill.find(),
+      ActivityLog.find().sort({ timestamp: -1 }).limit(15)
+    ]);
+
+    const totalRevenue = bills.reduce((sum, b) => sum + b.totalAmount, 0);
+
+    res.json({
+      totalPatients, totalEncounters, totalTests,
+      pendingTests, completedTests,
+      totalPrescriptions, pendingPrescriptions, issuedPrescriptions,
+      totalBills, totalRevenue,
+      recentActivity
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch stats', details: e.message });
+  }
+});
+
+app.get('/api/activitylog', async (req, res) => {
+  try {
+    const logs = await ActivityLog.find().sort({ timestamp: -1 }).limit(50);
+    res.json(logs);
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch activity log', details: e.message });
+  }
+});
+
+// ─── 404 & ERROR HANDLERS ─────────────────────────────────────────────────────
+app.use((req, res) => res.status(404).json({ error: `Route ${req.method} ${req.path} not found` }));
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// ─── Start Server ──────────────────────────────────────────────────────────────
+app.listen(PORT, () => {
+  console.log(`🏥 HMS Backend running on port ${PORT}`);
+  console.log(`📡 API: http://localhost:${PORT}/api`);
+});
